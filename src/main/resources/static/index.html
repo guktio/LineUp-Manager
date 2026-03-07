@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Panel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            width: 320px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 24px;
+            color: #333;
+        }
+
+        .link-btn {
+            display: block;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.25s, transform 0.2s;
+        }
+
+        .link-btn:hover {
+            background: #005fcc;
+            transform: translateY(-2px);
+        }
+
+        .link-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Navigation</h1>
+
+    <a class="link-btn" href="/h2">H2 Console</a>
+    <a class="link-btn" href="/swagger-ui/index.html">API Docs</a>
+    <a class="link-btn" href="http://localhost:5173">UI</a>
+</div>
+
+</body>
+</html>
