@@ -1,11 +1,13 @@
 package com.grenade.main.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -36,21 +38,21 @@ import jakarta.persistence.GenerationType;
 public class Grenade {
 
     public enum GrenadeType {
-        SMOKE,
-        FLASH,
-        HE,
-        MOLOTOV,
-        INCENDIARY,
+        weapon_smokegrenade,
+        weapon_flashbang,
+        weapon_hegrenade,
+        weapon_molotov,
+        weapon_incgrenade
     }
 
     public enum MapType {
-        DUST2,
-        MIRAGE,
-        NUKE,
-        ANCIENT,
-        TRAIN,
-        INFERNO,
-        OVERPASS,
+        DE_DUST2,
+        DE_MIRAGE,
+        DE_NUKE,
+        DE_ANCIENT,
+        DE_TRAIN,
+        DE_INFERNO,
+        DE_OVERPASS,
     }
 
     public enum Side {
@@ -68,7 +70,7 @@ public class Grenade {
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -91,8 +93,9 @@ public class Grenade {
     @Builder.Default
     private Long stars = 0L;
 
-    private String movement;
-    private String strength;
+    private String speed;
+
+    private List<String> buttons;
 
     private String description;
 
@@ -103,10 +106,18 @@ public class Grenade {
     private boolean deleted = false;
 
     @Builder.Default
-    private boolean approved = false;
+    private boolean approved = true;
+
+    @Builder.Default
+    private boolean ready = false;
 
     @CreationTimestamp
     @Column(updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Europe/Kyiv")
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(updatable = true)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Europe/Kyiv")
+    private LocalDateTime updatedAt;
 }

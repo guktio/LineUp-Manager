@@ -14,12 +14,14 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.grenade.main.config.JWT.JwtFilter;
+import com.grenade.main.config.filters.JwtFilter;
+import com.grenade.main.config.filters.ServerFilter;
 import com.grenade.main.service.UserDetailsServiceImpl;
 
 import lombok.AllArgsConstructor;
@@ -32,6 +34,8 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
+    private final ServerFilter serverFilter;
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -63,8 +67,10 @@ public class SecurityConfig {
                 .requestMatchers("/v3/**").permitAll()
                 .requestMatchers("/api/users/veify/**").permitAll()
                 .requestMatchers(HttpMethod.GET,"/api/**").permitAll()
+                .requestMatchers("/api/game/**").hasRole("GAME_SERVER")
                 .anyRequest().permitAll())
             .authenticationProvider(authenticationProvider())
+            .addFilterBefore(serverFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

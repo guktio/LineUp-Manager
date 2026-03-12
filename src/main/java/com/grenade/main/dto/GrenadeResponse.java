@@ -1,6 +1,7 @@
 package com.grenade.main.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.grenade.main.entity.Grenade;
@@ -17,13 +18,15 @@ public record GrenadeResponse(
     String media,
     String thumbnail,
     String command,
-    String movement,
-    String strength,
+    List<String> buttons,
+    String speed,
+    
     String description,
     boolean approved,
     Long stars,
     String authorName,
     boolean likedByMe,
+    boolean isReady,
     LocalDateTime createdAt
 ) {
 }

@@ -1,6 +1,5 @@
 package com.grenade.main.controller;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,11 +48,20 @@ public class GrenadeController {
     private final MediaService mediaService;
     private static final Logger logger = LoggerFactory.getLogger(GrenadeController.class);
 
+    @Operation(summary = "Create grenade")
+    @Tag(name = "user")
+    @PostMapping()
+    public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade) {
+        logger.info("POST {}" ,api);
+        return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.CREATED);
+    }
+
+    @SuppressWarnings("null")
     @Operation(summary = "Update grenade")
-    @Tag(name = "admin")
-    @PutMapping("admin/{id}")
-    public ResponseEntity<GrenadeResponse> adminUpdate(@PathVariable UUID id, @RequestBody Grenade grenade) {
-        return new ResponseEntity<>(grenadeService.adminUpdate(Objects.requireNonNull(id), grenade), HttpStatus.OK);
+    @Tag(name = "user")
+    @PutMapping("/{id}")
+    public ResponseEntity<GrenadeResponse> update(@PathVariable UUID id, @RequestBody GrenadeRequest grenade) {
+        return new ResponseEntity<>(grenadeService.update(id, grenade), HttpStatus.OK);
     }
 
     @Operation(summary = "Get favourite grenades")
@@ -64,13 +72,7 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getFavourite(uuid), HttpStatus.OK);
     }
     
-    @Operation(summary = "Create grenade")
-    @Tag(name = "user")
-    @PostMapping()
-    public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade) {
-        logger.info("POST {}" ,api);
-        return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.CREATED);
-    }
+
 
     @Operation(summary = "Upload video for grenade")
     @Tag(name = "user")
@@ -105,16 +107,15 @@ public class GrenadeController {
         if (sortdirection != null && !sortdirection.isBlank()) {
             sort = Sort.by(sortdirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "stars");
         }
-        logger.info("GET {} Params: p={}, s={}, map={}, grenade={}, sortDirection={}, userUuid={}, name={}, likedByUserId={}", api, p , s, map, grenade, sortdirection, userUuid, name, likedByUserId);
+        logger.info("GET {} Params: p={}, s={}, map={}, grenade={}, sortDirection={}, userUuid={}, name={}, likedByUserId={}", 
+                                api, p , s, map, grenade, sortdirection, userUuid, name, likedByUserId);
         return new ResponseEntity<>(grenadeService.getByFilter(PageRequest.of(p-1, s, sort), map, grenade, sortdirection, userUuid, name, likedByUserId), HttpStatus.OK);
     }
 
-    @Operation(summary = "Old method to get grenade by user. Will be deleted")
-    @Tag(name = "public")
-    @GetMapping("/u/{author}")
-    public ResponseEntity<List<GrenadeResponse>> getByUsername(@PathVariable String author){
-        logger.info("GET {}/u/{}", api ,author);
-        return ResponseEntity.ok(grenadeService.getByUser(author));
+    @GetMapping("/unready")
+    public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
+                                                                @RequestParam(defaultValue = "5") int s){
+        return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
     }
     
     @Operation(summary = "Delete grenade by uuid")
@@ -130,9 +131,9 @@ public class GrenadeController {
     @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "admin")
     @GetMapping("/admin")
-    public ResponseEntity<PageDTO<GrenadeResponse>> getNotApprovedGrenades(@RequestParam(defaultValue = "0") int p,
+    public ResponseEntity<PageDTO<GrenadeResponse>> getNotApprovedGrenades(@RequestParam(defaultValue = "1") int p,
                                                                             @RequestParam(defaultValue = "5") int s,
-                                                                            @RequestParam boolean isApproved) {
+                                                                            @RequestParam(defaultValue = "false") boolean isApproved) {
         logger.info("GET {}/admin Params: p={}, s={}, isApproved={}",api, p, s, isApproved);
         return new ResponseEntity<>(grenadeService.getApproved(PageRequest.of(p,s), isApproved) ,HttpStatus.OK);
     }
@@ -146,4 +147,6 @@ public class GrenadeController {
         grenadeService.approve(uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }

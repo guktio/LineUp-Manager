@@ -5,18 +5,13 @@ import java.util.UUID;
 
 import com.grenade.main.entity.User.RoleType;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class UserDTO {
-    private String username;
-    private UUID uuid;
-    private RoleType role;
-    private LocalDateTime createdAt;
-}
+@Builder
+public record UserDTO(
+    String username,
+    String steamId,
+    UUID uuid,
+    RoleType role,
+    LocalDateTime createdAt
+) {}

@@ -1,7 +1,8 @@
-package com.grenade.main.config.JWT;
+package com.grenade.main.config.filters;
 
 import java.io.IOException;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.grenade.main.entity.User;
+import com.grenade.main.service.JwtProvider;
 import com.grenade.main.service.UserDetailsServiceImpl;
 
 import jakarta.servlet.FilterChain;
@@ -19,6 +21,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Component
+@Order(2)
 public class JwtFilter extends OncePerRequestFilter{
 
     private final JwtProvider jwtProvider;
@@ -28,7 +31,8 @@ public class JwtFilter extends OncePerRequestFilter{
     Filter before spring security default filter
     */
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, 
+                                    @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = getToken(request);

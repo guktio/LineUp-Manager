@@ -32,6 +32,7 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
             AND s.user.id = :likedByUserId
         ))
         AND  g.approved = true
+        AND  g.ready = true
     """)
     Page<Grenade> findByFilter(Pageable pageable,
                             @Param("map") Grenade.MapType map,
@@ -41,6 +42,14 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
                             @Param("likedByUserId") Long likedByUserId);
 
     List<Grenade> findByAuthor(User author);
+
+
+    @Query("""
+            SELECT g FROM Grenade g
+            WHERE g.author.id = :author
+            AND g.ready = false
+            """)
+    Page<Grenade> findUnreadyByAuthor(Pageable pageable, @Param("author") Long author);
 
     @Query("""
             SELECT g FROM Grenade g

@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grenade.main.config.JWT.JwtProvider;
 import com.grenade.main.dto.AuthResponse;
+import com.grenade.main.dto.ServerUserDTO;
 import com.grenade.main.entity.SteamProfile;
 import com.grenade.main.entity.User;
 import com.grenade.main.exception.SteamAuthException;
@@ -87,14 +87,19 @@ public class SteamService {
             e.printStackTrace();
             throw new BadCredentialsException("Error in steam login");
         }
-        return loginWithSteam(steamId);
+        return loginWithSteam(toDTO(steamId));
+    }
+
+    private ServerUserDTO toDTO(String obj){
+        ServerUserDTO dto = ServerUserDTO.builder().userId(obj).build();
+        return dto;
     }
 
 
-    private AuthResponse loginWithSteam(String steamId) {
-        logger.info(steamId);
-            User user = userRepo.findBySteamId(steamId)
-                    .orElseGet(() -> createSteamUser(steamId));
+    public AuthResponse loginWithSteam(ServerUserDTO dto) {
+        logger.info(dto.userId());
+            User user = userRepo.findBySteamId(dto.userId())
+                    .orElseGet(() -> createSteamUser(dto.userId()));
     
             Authentication auth = new UsernamePasswordAuthenticationToken(
                     user,

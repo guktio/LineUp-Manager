@@ -1,4 +1,4 @@
-package com.grenade.main.config.JWT;
+package com.grenade.main.service;
 
 import java.util.Date;
 

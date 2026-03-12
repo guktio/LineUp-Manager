@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.grenade.main.config.JWT.JwtProvider;
 import com.grenade.main.dto.AuthRequest;
 import com.grenade.main.dto.AuthResponse;
 import com.grenade.main.entity.User;

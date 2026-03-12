@@ -47,6 +47,14 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         return saved;
     }
 
+    public boolean isUserExist(String steamId) {
+        return userRepo.existsBySteamId(steamId);
+    }
+
+    public User getBySteamId(String steamId){
+        return userRepo.findBySteamId(steamId).orElseThrow(() -> new EntityNotFoundException("User was not found with steamId "+ steamId));
+    }
+
     public UserDTO update(Long id, User user) {
         user.setId(id);
         User saved = userRepo.save(user);
@@ -55,11 +63,13 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
 
     @Override
     public UserDTO toDTO(User user){
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(user.getUsername());
-        userDTO.setUuid(user.getUuid());
-        userDTO.setRole(user.getRole());
-        userDTO.setCreatedAt(user.getCreatedAt());
+        UserDTO userDTO = UserDTO.builder()
+                        .username(user.getUsername())
+                        .steamId(user.getSteamId())
+                        .uuid(user.getUuid())
+                        .role(user.getRole())
+                        .createdAt(user.getCreatedAt())
+                        .build();
         return userDTO;
     }
 
