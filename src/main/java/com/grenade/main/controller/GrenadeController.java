@@ -57,7 +57,6 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.CREATED);
     }
 
-    @SuppressWarnings("null")
     @Operation(summary = "Update grenade")
     @Tag(name = "user")
     @PutMapping("/{id}")

@@ -9,8 +9,8 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.granade</groupId>
-	<artifactId>main</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>LineUp</artifactId>
+	<version>0.2.0</version>
 	<name>main</name>
 	<description>granade rest api app</description>
 	<url/>

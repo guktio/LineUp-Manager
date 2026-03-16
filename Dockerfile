@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21
 
 WORKDIR /app
-COPY target/main-0.0.1-SNAPSHOT.jar main-0.0.1-SNAPSHOT.jar
-EXPOSE 8081
-CMD ["java", "-jar", "main-0.0.1-SNAPSHOT.jar"]
+COPY target/LineUp-0.2.0.jar LineUp-0.2.0.jar
+EXPOSE 8080
+CMD ["java", "-jar", "LineUp-0.2.0.jar","--spring.profiles.active=dev"]
