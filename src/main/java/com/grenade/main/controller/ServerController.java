@@ -38,6 +38,7 @@ public class ServerController {
 
     @PostMapping("/lineup/new")
     public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade){
+        logger.info("POST /api/game/lineup/new {}", grenade.toString());
         String[] parts = SecurityContextHolder.getContext().getAuthentication().getName().split("-");
         User user = userService.getBySteamId(parts[1]);
          Authentication auth = new UsernamePasswordAuthenticationToken(

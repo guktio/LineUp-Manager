@@ -55,11 +55,11 @@ public class Grenade {
         DE_OVERPASS,
     }
 
-    public enum Side {
-        Both,
-        T,
-        CT
-    }
+    // public enum Side {
+    //     Both,
+    //     T,
+    //     CT
+    // }
 
 
     @Id
@@ -81,7 +81,7 @@ public class Grenade {
 
     private String team;
     
-    private Side side;
+    private String side;
 
     private String media;
 
@@ -106,7 +106,7 @@ public class Grenade {
     private boolean deleted = false;
 
     @Builder.Default
-    private boolean approved = true;
+    private boolean approved = false;
 
     @Builder.Default
     private boolean ready = false;

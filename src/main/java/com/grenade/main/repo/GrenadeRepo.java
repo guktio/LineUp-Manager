@@ -65,6 +65,11 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
 
     @Modifying
     @Transactional
+    @Query("UPDATE Grenade g SET g.ready = true WHERE g.uuid = :uuid")
+    void setReadyTrueByUuid(UUID uuid);
+
+    @Modifying
+    @Transactional
     @Query("UPDATE Grenade g SET g.stars = g.stars +1 WHERE g.uuid = :uuid")
     void increaseStars(@Param("uuid") UUID uuid);
 

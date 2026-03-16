@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,8 +27,8 @@ import com.grenade.main.dto.GrenadeRequest;
 import com.grenade.main.dto.GrenadeResponse;
 import com.grenade.main.dto.MediaDTO;
 import com.grenade.main.dto.PageDTO;
+import com.grenade.main.dto.ReadyDTO;
 import com.grenade.main.entity.Grenade;
-import com.grenade.main.entity.Stars;
 import com.grenade.main.service.GrenadeService;
 import com.grenade.main.service.MediaService;
 
@@ -61,18 +62,9 @@ public class GrenadeController {
     @Tag(name = "user")
     @PutMapping("/{id}")
     public ResponseEntity<GrenadeResponse> update(@PathVariable UUID id, @RequestBody GrenadeRequest grenade) {
+        logger.info("PUT {} Grenade info:",api,grenade);
         return new ResponseEntity<>(grenadeService.update(id, grenade), HttpStatus.OK);
     }
-
-    @Operation(summary = "Get favourite grenades")
-    @Tag(name = "user")
-    @GetMapping("/favourites/{uuid}")
-    public ResponseEntity<Stars> favourite(@PathVariable("uuid") UUID uuid){
-        logger.info("GET  {}/favourite/{}",api,uuid);
-        return new ResponseEntity<>(grenadeService.getFavourite(uuid), HttpStatus.OK);
-    }
-    
-
 
     @Operation(summary = "Upload video for grenade")
     @Tag(name = "user")
@@ -103,7 +95,7 @@ public class GrenadeController {
                                                                 @RequestParam(required = false) String userUuid,
                                                                 @RequestParam(required = false) String name,
                                                                 @RequestParam(required = false) String likedByUserId) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "stars");
+         Sort sort = Sort.by(Sort.Direction.DESC, "stars");
         if (sortdirection != null && !sortdirection.isBlank()) {
             sort = Sort.by(sortdirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "stars");
         }
@@ -116,6 +108,12 @@ public class GrenadeController {
     public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
                                                                 @RequestParam(defaultValue = "5") int s){
         return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/ready")
+    public ResponseEntity<GrenadeResponse> setReady(@PathVariable UUID id, @RequestBody ReadyDTO readyDTO){
+        grenadeService.setReadyToGrenade(id);
+        return new ResponseEntity<>(grenadeService.getByUuid(id) ,HttpStatus.OK);
     }
     
     @Operation(summary = "Delete grenade by uuid")
