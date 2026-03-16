@@ -23,9 +23,9 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
         AND (:author IS NULL OR g.author.id = :author)
         AND (
             :name IS NULL 
-            OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%'))
-            OR LOWER(g.description) LIKE LOWER(CONCAT('%', :name, '%'))
-          )
+            OR CAST(g.name AS string) LIKE CONCAT('%', CAST(:name AS string), '%')
+            OR CAST(g.description AS string) LIKE CONCAT('%', CAST(:name AS string), '%')
+        )
         AND (:likedByUserId IS NULL OR EXISTS(
             SELECT 1 FROM Stars s
             WHERE s.grenade = g
