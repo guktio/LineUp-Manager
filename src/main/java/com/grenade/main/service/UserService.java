@@ -30,6 +30,11 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
             throw new IllegalArgumentException("User already exists");
         }
 
+        if (userRepo.existsBySteamId(user.getSteamId())) {
+            throw new RuntimeException("User with steamId already exists");
+        }
+        
+
         User.UserBuilder usr = User.builder()
             .username(user.getUsername())
             .steamId(user.getSteamId());
@@ -55,10 +60,10 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         return userRepo.findBySteamId(steamId).orElseThrow(() -> new EntityNotFoundException("User was not found with steamId "+ steamId));
     }
 
-    public UserDTO update(Long id, User user) {
+    public User update(Long id, User user) {
         user.setId(id);
         User saved = userRepo.save(user);
-        return toDTO(saved);
+        return saved;
     }
 
     @Override

@@ -35,6 +35,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
     private final ServerFilter serverFilter;
+    private final AuthEntryPoint authEntryPoint;
 
 
     @Bean
@@ -60,20 +61,21 @@ public class SecurityConfig {
                 .requestMatchers("/index.html").permitAll()
                 .requestMatchers("/docs").permitAll()
                 .requestMatchers("/files/**").permitAll()
-                .requestMatchers("/h2/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/**").permitAll()
-                .requestMatchers("/api/users/veify/**").permitAll()
-                .requestMatchers(HttpMethod.GET,"/api/**").permitAll()
+                .requestMatchers("/h2/**").permitAll()
+                .requestMatchers("/h2").permitAll()
+                .requestMatchers(HttpMethod.GET,"/api/grenades").permitAll()
+                .requestMatchers(HttpMethod.GET,"/api/users").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/game/**").hasRole("GAME_SERVER")
-                .anyRequest().permitAll())
+                .anyRequest().authenticated())
+            .exceptionHandling(e ->
+                e.authenticationEntryPoint(authEntryPoint))
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(serverFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
         return http.build();
     }
 

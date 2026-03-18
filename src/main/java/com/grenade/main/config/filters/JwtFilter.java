@@ -2,6 +2,8 @@ package com.grenade.main.config.filters;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +28,7 @@ public class JwtFilter extends OncePerRequestFilter{
 
     private final JwtProvider jwtProvider;
     private final UserDetailsServiceImpl userDetailsService;
+    private final Logger logger = LoggerFactory.getLogger(getClass()); 
 
     /*
     Filter before spring security default filter
@@ -43,6 +46,7 @@ public class JwtFilter extends OncePerRequestFilter{
         }
 
         if (!jwtProvider.validateToken(token)) {
+            logger.info("token invalid");
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,10 +55,11 @@ public class JwtFilter extends OncePerRequestFilter{
         User userDetails = userDetailsService.loadUserByUsername(username);
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        logger.info(userDetails.getAuthorities().toString());
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
+        logger.info(userDetails.toString());
         filterChain.doFilter(request, response);
 
     }

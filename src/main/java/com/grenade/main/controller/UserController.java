@@ -39,11 +39,19 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private static final String api = "/api/users";
+
+    @Operation(summary = "Get user by username")
+    @Tag(name = "public")
+    @GetMapping("/{username}")
+    public UserDTO getUserByUsername(@PathVariable String username) {
+        logger.info("GET {}/{}", api,username);
+        return userService.findByUsername(username);
+    }
     
     @Operation(summary = "Update user")
     @Tag(name = "admin")
     @PutMapping("/{id}")
-    public UserDTO update(@PathVariable Long id, @RequestBody User user) {
+    public User update(@PathVariable Long id, @RequestBody User user) {
         user.setId(id);
         return userService.update(id, user);
     }
@@ -64,14 +72,6 @@ public class UserController {
                                         @RequestParam(defaultValue = "10") int size) {
         logger.info("GET {}",api);
         return userService.getAll(PageRequest.of(page, size));
-    }
-    
-    @Operation(summary = "Get user by username")
-    @Tag(name = "public")
-    @GetMapping("/{username}")
-    public UserDTO getUserByUsername(@PathVariable String username) {
-        logger.info("GET {}/{}", api,username);
-        return userService.findByUsername(username);
     }
 
     @Operation(summary = "Get logged user")

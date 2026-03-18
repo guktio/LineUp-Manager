@@ -31,7 +31,7 @@ public class AuthService {
 
 
     private final static Logger logger = LoggerFactory.getLogger(AuthService.class);
-
+//Not used now
     public AuthResponse register(AuthRequest authRequest) {
         User user = new User();
         user.setUsername(authRequest.getUsername());
@@ -44,7 +44,7 @@ public class AuthService {
         logger.info("User registered {}",user.toString());
         return new AuthResponse(userService.findByUsername(jwtProvider.getUsernameFromToken(token)), token);
     }
-
+//Not used now
     public AuthResponse login(AuthRequest authRequest) {
         try{
             UsernamePasswordAuthenticationToken authToken =

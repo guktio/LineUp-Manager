@@ -21,7 +21,6 @@ import com.grenade.main.dto.PageDTO;
 import com.grenade.main.entity.Grenade;
 import com.grenade.main.entity.User;
 import com.grenade.main.entity.Media;
-import com.grenade.main.entity.Stars;
 import com.grenade.main.repo.GrenadeRepo;
 import com.grenade.main.repo.MediaRepo;
 import com.grenade.main.repo.StarsRepo;
@@ -47,7 +46,7 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         this.videoThumbnailExtractor = videoThumbnailExtractor;
     }
 
-    private static String generateName(){
+    public String generateName(){
         List<String> words1 = List.of("iron", "shadow", "frost", "storm", "dark", "blood", "silver", "golden");
         List<String> words2 = List.of("blade", "edge", "fang", "claw", "strike", "born", "forge", "bane");
 
@@ -179,20 +178,13 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
 
     public boolean isStaredByUser(UUID grUuid){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(username != "anonymousUser") {
+        if(username.equals("anonymousUser")) {
             Grenade gr = grenadeRepo.findByUuid(grUuid)
                 .orElseThrow(() -> new EntityNotFoundException("Entity with uuid "+grUuid+" was not found"));
             User user = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User with name "+username+" was not found2"));
             return starsRepo.existsByUserIdAndGrenadeId(gr.getId(), user.getId());
         }
         return false;
-    }
-
-    public Stars getFavourite(UUID id){
-        Grenade gr = grenadeRepo.findByUuid(id)
-            .orElseThrow(() -> new EntityNotFoundException("Entity with uuid "+id+" was not found"));
-        Stars page = starsRepo.findByUserId(gr.getId());
-        return page;
     }
 
     @Override
