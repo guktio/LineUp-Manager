@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package
 
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre-jammy
 
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
@@ -18,4 +18,4 @@ COPY --from=builder /build/target/LineUp-0.2.1.jar LineUp-0.2.1.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "LineUp-0.2.1.jar","--spring.profiles.active=dev"]
+ENTRYPOINT ["java", "-jar", "LineUp-0.2.1.jar","--spring.profiles.active=prod"]
