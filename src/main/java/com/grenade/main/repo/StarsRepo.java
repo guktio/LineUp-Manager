@@ -12,6 +12,6 @@ import com.grenade.main.entity.Stars;
 public interface StarsRepo extends JpaRepository<Stars,Long>{
     Optional<Stars> findByUserUuidAndGrenadeUuid(UUID userId, UUID grenadeId);
     Long countByGrenadeUuid(UUID grenadeId);
-    boolean existsByUserIdAndGrenadeId(Long grenadeId, Long userId);
+    boolean existsByUserIdAndGrenadeId(Long userId, Long grenadeId);
     Stars findByUserId(Long id);
 }

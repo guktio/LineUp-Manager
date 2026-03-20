@@ -35,12 +35,13 @@ public class StarsService {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User with username"+username+" not found"));
         Grenade grenade = grenadeRepo.findByUuid(grUuid).orElseThrow(() -> new EntityNotFoundException("Grenade with uuid "+grUuid+"not found"));
         Optional<Stars> exists = starsRepo.findByUserUuidAndGrenadeUuid(user.getUuid(),grUuid);
-        logger.info("User: {} liked lineup: {};",user.getUsername(),grenade.getUuid());
         if(exists.isPresent()) {
+            logger.info("User: {} unstared lineup: {};",user.getUsername(),grenade.getUuid());
             exists.ifPresent(starsRepo::delete);
             grenadeRepo.decreaseStars(grUuid);
             return false;
         } else {
+            logger.info("User: {} stared lineup: {};",user.getUsername(),grenade.getUuid());
             Stars star = new Stars();
             star.setGrenade(grenade);
             star.setUser(user);
