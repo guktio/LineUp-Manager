@@ -178,7 +178,7 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
 
     public boolean isStaredByUser(UUID grUuid){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(username.equals("anonymousUser")) {
+        if(!username.equals("anonymousUser")) {
             Grenade gr = grenadeRepo.findByUuid(grUuid)
                 .orElseThrow(() -> new EntityNotFoundException("Entity with uuid "+grUuid+" was not found"));
             User user = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User with name "+username+" was not found2"));
