@@ -49,7 +49,7 @@ cd cs2-lineup-api
 ```
 3. **Run the project:**
 ```bash
-  java -jar target/cs2-lineup-api.jar
+  mvn spring-boot:run -Dspring-boot.run.arguments="--STEAM_API_KEY=YOUR_STEAM_KEY"
 ```
   **Access the API documentation:**
   http://localhost:8080/swagger-ui/index.html
