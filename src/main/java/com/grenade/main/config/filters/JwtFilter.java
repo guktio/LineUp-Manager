@@ -1,6 +1,7 @@
 package com.grenade.main.config.filters;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,8 @@ public class JwtFilter extends OncePerRequestFilter{
             return;
         }
 
-        String username = jwtProvider.getUsernameFromToken(token);
-        User userDetails = userDetailsService.loadUserByUsername(username);
+        UUID userUuid = UUID.fromString(jwtProvider.getUuidFromToken(token));
+        User userDetails = userDetailsService.loadUserByUuid(userUuid);
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

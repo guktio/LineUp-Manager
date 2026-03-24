@@ -64,9 +64,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleSteamAuthException(SteamAuthException ex) {
         return buildResponse(ex, HttpStatus.UNAUTHORIZED);
     }
-
-    // @ExceptionHandler(UsernameNotFoundException.class)
-    // public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-    //     return buildResponse(ex, HttpStatus.UNAUTHORIZED);
-    // }
 }

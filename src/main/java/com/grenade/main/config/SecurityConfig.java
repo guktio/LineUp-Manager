@@ -36,6 +36,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final ServerFilter serverFilter;
     private final AuthEntryPoint authEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
 
     @Bean
@@ -71,7 +72,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/game/**").hasRole("GAME_SERVER")
                 .anyRequest().authenticated())
             .exceptionHandling(e ->
-                e.authenticationEntryPoint(authEntryPoint))
+                e.authenticationEntryPoint(authEntryPoint).accessDeniedHandler(restAccessDeniedHandler))
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(serverFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

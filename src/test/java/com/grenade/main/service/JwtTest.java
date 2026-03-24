@@ -6,6 +6,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.UUID;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -14,21 +16,20 @@ class JwtTest {
 
     private JwtProvider jwtProvider;
 
-    private String testUsername;
     private String secret;
     private long expiration= 3600;
-
+    private  UUID uuid;
     @BeforeEach
     void setUp() {
         secret = "mySecretKeyForJwtThatIsLongEnough12345678901234567890";
         
         jwtProvider = new JwtProvider(secret, expiration);
-        testUsername = "testname";
+        uuid = UUID.randomUUID();
     }
 
     @Test
     void shouldGenerateToken() {
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
 
         assertThat(token).isNotNull();
         assertThat(token).isNotEmpty();
@@ -37,7 +38,7 @@ class JwtTest {
 
     @Test
     void shouldValidateToken() {
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
 
         Boolean isValid = jwtProvider.validateToken(token);
 
@@ -47,7 +48,7 @@ class JwtTest {
     @Test
     void shouldNotValidateExpiredToken() {
         jwtProvider.setExpiration(-1);
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
         Boolean isValid = jwtProvider.validateToken(token);
 
         assertThat(isValid).isFalse();
@@ -55,26 +56,26 @@ class JwtTest {
 
     @Test
     void shouldGetUsernameFromToken(){
-        String token = jwtProvider.generateToken(testUsername);
-        String username = jwtProvider.getUsernameFromToken(token);
+        String token = jwtProvider.generateToken(uuid);
+        UUID userUuid = UUID.fromString(jwtProvider.getUuidFromToken(token));
 
-        assertThat(username).isEqualTo("testname");
+        assertThat(uuid).isEqualTo(userUuid);
     }
 
     @Test
     void shouldGenerateTwoSameTokens(){
-        String token = jwtProvider.generateToken(testUsername);
-		String token2 = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
+		String token2 = jwtProvider.generateToken(uuid);
 		
 		assertThat(token).isEqualTo(token2);
     }
 
     @Test
     void shouldGenerateTwoDifferentTokens(){
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
 		jwtProvider.validateToken(token);
         jwtProvider.setExpiration(678);
-		String token2 = jwtProvider.generateToken(testUsername);
+		String token2 = jwtProvider.generateToken(uuid);
 		jwtProvider.validateToken(token2);
 		
 		assertThat(token).isNotEqualTo(token2);
@@ -82,7 +83,7 @@ class JwtTest {
 
     @Test
     void shouldRejectTokenWithWrongKey() {
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
         
         JwtProvider anotherProvider = new JwtProvider(
             "differentSecretKeyThatIsAlsoLongEnough1234567890123456",
@@ -115,7 +116,7 @@ class JwtTest {
 
     @Test
     void shouldRejectTamperedToken() {
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
 
         String tampered = token.substring(0, token.length() - 1) + "x";
 
@@ -123,14 +124,8 @@ class JwtTest {
     }
 
     @Test
-    void shouldThrowExceptionForInvalidTokenWhenGettingUsername() {
-        assertThatThrownBy(() -> jwtProvider.getUsernameFromToken("invalid"))
-                .isInstanceOf(Exception.class);
-    }
-
-    @Test
     void shouldHaveCorrectExpirationTime() {
-        String token = jwtProvider.generateToken(testUsername);
+        String token = jwtProvider.generateToken(uuid);
 
         Claims claims = Jwts.parser()
                 .verifyWith(jwtProvider.getKey())
@@ -140,14 +135,5 @@ class JwtTest {
 
         assertThat(claims.getExpiration())
                 .isAfter(claims.getIssuedAt());
-    }
-    
-    @Test
-    void shouldReturnCorrectUsername() {
-        String token = jwtProvider.generateToken("alice");
-
-        String username = jwtProvider.getUsernameFromToken(token);
-
-        assertThat(username).isEqualTo("alice");
     }
 }

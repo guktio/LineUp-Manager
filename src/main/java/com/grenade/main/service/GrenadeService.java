@@ -143,6 +143,7 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
             user = userRepo.findByUuid(UUID.fromString(authorUuid)).orElseThrow(() -> new EntityNotFoundException("Entity not found with uuid:"+authorUuid)).getId();
         }
         Page<Grenade> page = grenadeRepo.findByFilter(pageable, map, grenade, user, name, userId);
+        logger.debug("");
         PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList() , page.getNumber() + 1, page.getTotalPages());
         return pageDTO;
     }

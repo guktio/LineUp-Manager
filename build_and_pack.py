@@ -2,7 +2,7 @@ import subprocess
 import sys
 
 IMAGE_NAME = "lineup"
-IMAGE_TAG = "0.2.2"
+IMAGE_TAG = "0.2.1"
 TAR_FILE = f"{IMAGE_NAME}-{IMAGE_TAG}.tar"
 
 REMOTE_USER = "guktio"

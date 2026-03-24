@@ -10,7 +10,8 @@ import com.grenade.main.entity.User;
 @Repository
 public interface UserRepo extends RepoBase<User, UUID> {
     Optional<User> findByUsername(String username);
-    boolean existsByUsername(String username);
+    boolean existsByUuid(UUID uuid);
+    boolean existsByEmail(String email);
     Optional<User> findBySteamId(String steamId);
     boolean existsBySteamId(String steamId);
 }

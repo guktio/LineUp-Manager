@@ -41,3 +41,5 @@ build/
 *.zip
 *.jfr
 docker-compose.ymlы
+
+!**/src/main/resources/**.properies

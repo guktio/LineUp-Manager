@@ -68,8 +68,8 @@ public class GrenadeController {
     @Operation(summary = "Upload video for grenade")
     @Tag(name = "user")
     @PostMapping(value = "/video",
-    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-    produces = MediaType.APPLICATION_JSON_VALUE)
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MediaDTO> saveVideo(MultipartFile file){
         logger.info("POST {}/video format={}, name={}", api, file.getContentType(), file.getOriginalFilename());
         return new ResponseEntity<>(mediaService.create(file), HttpStatus.CREATED);
@@ -125,9 +125,9 @@ public class GrenadeController {
     }
 
     @Operation(summary = "Get unaproved grenades")
-    @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "admin")
-    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/unapproved")
     public ResponseEntity<PageDTO<GrenadeResponse>> getNotApprovedGrenades(@RequestParam(defaultValue = "1") int p,
                                                                             @RequestParam(defaultValue = "5") int s,
                                                                             @RequestParam(defaultValue = "false") boolean isApproved) {
@@ -138,12 +138,10 @@ public class GrenadeController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Approve grenade")
     @Tag(name = "admin")
-    @GetMapping("/admin/{uuid}")
+    @GetMapping("/unapproved/{uuid}")
     public ResponseEntity<Void> approveGrenade(@PathVariable UUID uuid){
         logger.info("GET {}/admin/{}",api, uuid);
         grenadeService.approve(uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-
 }

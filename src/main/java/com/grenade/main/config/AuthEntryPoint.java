@@ -21,7 +21,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
 
         response.getWriter().write("""
             {
-              "from": "SPRING_SECURITY_ENTRY_POINT"
+              "Error": "Unauthorized "
             }
         """);
     }

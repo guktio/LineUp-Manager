@@ -11,6 +11,7 @@ import lombok.Builder;
 public record UserDTO(
     String username,
     String steamId,
+    String email,
     UUID uuid,
     RoleType role,
     LocalDateTime createdAt

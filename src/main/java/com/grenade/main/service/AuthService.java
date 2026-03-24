@@ -1,5 +1,7 @@
 package com.grenade.main.service;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.grenade.main.dto.AuthRequest;
 import com.grenade.main.dto.AuthResponse;
+import com.grenade.main.dto.UserRequest;
 import com.grenade.main.entity.User;
 
 import lombok.AllArgsConstructor;
@@ -28,23 +31,25 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
 
-
-
     private final static Logger logger = LoggerFactory.getLogger(AuthService.class);
-//Not used now
-    public AuthResponse register(AuthRequest authRequest) {
-        User user = new User();
-        user.setUsername(authRequest.getUsername());
-        if(authRequest.getPassword() != null && authRequest.getPassword().equals(null)){
-            user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
-        }
 
-        userService.create(user);
-        String token = jwtProvider.generateToken(user.getUsername());
-        logger.info("User registered {}",user.toString());
-        return new AuthResponse(userService.findByUsername(jwtProvider.getUsernameFromToken(token)), token);
+    public AuthResponse register(AuthRequest authRequest) {
+        UserRequest.UserRequestBuilder user = UserRequest
+                            .builder()
+                            .username(authRequest.getUsername())
+                            .email(authRequest.getEmail())
+                            .password(authRequest.getPassword());
+        if(authRequest.getPassword() != null && authRequest.getPassword().equals(null)){
+            user.password(passwordEncoder.encode(authRequest.getPassword()));
+        }
+        User created = userService.create(user.build());
+
+        String token = jwtProvider.generateToken(created.getUuid());
+
+        logger.info("User registered {}", created.toString());
+        return new AuthResponse(userService.toDTO(created), token);
     }
-//Not used now
+
     public AuthResponse login(AuthRequest authRequest) {
         try{
             UsernamePasswordAuthenticationToken authToken =
@@ -54,9 +59,12 @@ public class AuthService {
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            String token = jwtProvider.generateToken(auth.getName());
+            UUID userUuid = ((User) auth.getPrincipal()).getUuid(); 
+
+            String token = jwtProvider.generateToken(userUuid);
+            
             logger.info("User {} logged in.",auth.getName());
-            return new AuthResponse(userService.findByUsername(jwtProvider.getUsernameFromToken(token)), token);
+            return new AuthResponse(userService.findByUuid(UUID.fromString(jwtProvider.getUuidFromToken(token))), token);
 
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");

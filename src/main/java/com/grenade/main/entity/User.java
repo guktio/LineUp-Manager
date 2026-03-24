@@ -55,8 +55,11 @@ public class User implements UserDetails{
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    @Column(unique = true)
+    @Column(nullable = false)
     private String username;
+    
+    @Column(unique = true)
+    private String email;
 
     private String password;
 
@@ -72,6 +75,7 @@ public class User implements UserDetails{
         fetch = FetchType.LAZY
     )
     private SteamProfile steamProfile;
+
 
     @Column(nullable = true)
     private String steamId;

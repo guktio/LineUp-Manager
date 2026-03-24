@@ -22,5 +22,7 @@ public class MainApplication implements CommandLineRunner{
 	@Override
     public void run(String... args) {
         logger.info("Started!");
+        logger.debug("Debug mode activated!");
+
     }
 }

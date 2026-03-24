@@ -1,6 +1,7 @@
 package com.grenade.main.service;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -31,12 +32,12 @@ public class JwtProvider {
         this.expiration = expiration;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(UUID userUuid) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expiration * 1000);
 
         return Jwts.builder()
-                .subject(username)
+                .subject(userUuid.toString())
                 .issuedAt(now)
                 .expiration(exp)
                 .signWith(key)
@@ -54,7 +55,7 @@ public class JwtProvider {
     
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getUuidFromToken(String token) {
         JwtParser parser = Jwts.parser().verifyWith(key).build();
         Claims claims = parser.parseSignedClaims(token).getPayload();
         return claims.getSubject();

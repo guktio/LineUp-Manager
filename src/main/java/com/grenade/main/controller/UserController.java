@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.grenade.main.dto.PageDTO;
 import com.grenade.main.dto.UserDTO;
+import com.grenade.main.dto.UserRequest;
 import com.grenade.main.entity.User;
 import com.grenade.main.service.UserService;
 
@@ -42,25 +43,24 @@ public class UserController {
 
     @Operation(summary = "Get user by username")
     @Tag(name = "public")
-    @GetMapping("/{username}")
-    public UserDTO getUserByUsername(@PathVariable String username) {
-        logger.info("GET {}/{}", api,username);
-        return userService.findByUsername(username);
+    @GetMapping("/{uuid}")
+    public UserDTO getUserByUuid(@PathVariable String uuid) {
+        logger.info("GET {}/{}", api, uuid);
+        return userService.findByUuid(UUID.fromString(uuid));
     }
     
     @Operation(summary = "Update user")
     @Tag(name = "admin")
     @PutMapping("/{id}")
-    public User update(@PathVariable Long id, @RequestBody User user) {
-        user.setId(id);
-        return userService.update(id, user);
+    public User update(@PathVariable UUID uuid, @RequestBody User user) {
+        return userService.fullUpdate(uuid, user);
     }
 
     @Operation(summary = "Create user")
     @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "admin")
     @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(@RequestBody UserRequest user) {
         logger.info("POST {}",api);
         return userService.create(user);
     }
@@ -79,9 +79,10 @@ public class UserController {
     @GetMapping("/me")
     public UserDTO currentUser() {
         logger.info("GET {}/me",api);
-        return userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        UUID userUuid = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUuid();
+        return userService.findByUuid(userUuid);
     }
-    
+
     @Operation(summary = "Delete user")
     @Tag(name = "user")
     @DeleteMapping("/{id}")

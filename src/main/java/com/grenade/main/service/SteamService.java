@@ -109,12 +109,12 @@ public class SteamService {
     
             SecurityContextHolder.getContext().setAuthentication(auth);
     
-            String token = jwtProvider.generateToken(user.getUsername());
+            String token = jwtProvider.generateToken(user.getUuid());
     
             logger.info("User {} logged in via Steam.", user.getUsername());
     
             return new AuthResponse(
-                    userService.findByUsername(user.getUsername()),
+                    userService.findByUuid(user.getUuid()),
                     token
             );
     }
