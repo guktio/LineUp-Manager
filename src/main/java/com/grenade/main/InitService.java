@@ -2,6 +2,8 @@ package com.grenade.main;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ public class InitService {
 
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
+        private final static Logger logger = LoggerFactory.getLogger(InitService.class);
+
 
     @PostConstruct
     @SuppressWarnings("null")
@@ -24,11 +28,12 @@ public class InitService {
         if(!userRepo.existsBySteamId("76561198848703847")){
             User user = User.builder()
                                 .username("admin")
+                                .email("admin")
                                 .password(passwordEncoder.encode("admin"))
-                                .steamId("76561198848703847")
                                 .uuid(UUID.randomUUID())
                                 .role(User.RoleType.ADMIN)
                                 .build();
+            logger.debug("Super user created!");
             userRepo.save(user);
         }
     }

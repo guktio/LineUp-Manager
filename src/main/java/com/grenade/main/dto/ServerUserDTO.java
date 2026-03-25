@@ -5,5 +5,4 @@ import lombok.Builder;
 @Builder
 public record ServerUserDTO(
     String userId
-) 
-{}
+) {}

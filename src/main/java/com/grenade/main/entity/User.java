@@ -68,17 +68,8 @@ public class User implements UserDetails{
     @Builder.Default
     private RoleType role = RoleType.USER;
 
-    @OneToOne(
-        mappedBy = "user",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
-    )
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private SteamProfile steamProfile;
-
-
-    @Column(nullable = true)
-    private String steamId;
 
     @CreationTimestamp()
     @Column(updatable = false)

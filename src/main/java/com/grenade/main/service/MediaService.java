@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
 
     private MediaRepo mediaRepo;
     private UserRepo userRepo;
+
+    private static final Logger logger = LoggerFactory.getLogger(MediaService.class);
 
     @Value("${files.UPLOAD_DIR}")
     private String uploadDirPath;
@@ -75,7 +79,8 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
                         .user(userRepo.findByUsername(username).orElseThrow(
                                             () -> new EntityNotFoundException("User does not found:" + username)))
                         .build();
-            mediaRepo.save(Objects.requireNonNull(video));
+            Media saved = mediaRepo.save(Objects.requireNonNull(video));
+            logger.debug("Saved media: {}", saved.toString());
             return(toDTO(video));
         } catch (IOException e) {
             throw new RuntimeException("File upload failed", e);

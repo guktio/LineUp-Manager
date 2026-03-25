@@ -33,14 +33,12 @@ public class SteamProfile {
 
     private String personaname;
 
+    private String steamId;
+
     private String profileurl;
 
     @OneToOne
-    @JoinColumn(
-        name = "user_id",
-        nullable = false,
-        unique = true
-    )
+    @JoinColumn(name = "user_id")
     private User user;
 
     @CreationTimestamp()

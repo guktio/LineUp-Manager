@@ -82,13 +82,14 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         }
         Grenade entity = Objects.requireNonNull(grnd.build(), "Grenade builder returned null");
         grenadeRepo.save(entity);
-        logger.info("Created grenade: {}, by user: {}", entity.getUuid(), entity.getAuthor().getUuid());
+        logger.debug("Created grenade: {}, by user: {}", entity.getUuid(), entity.getAuthor().getUuid());
         return toDTO(entity);
     }
 
     public GrenadeResponse getByUuid(UUID uuid){
         Grenade entity = grenadeRepo.findByUuid(uuid).orElseThrow(() -> 
                         new EntityNotFoundException("Entity does not found with uuid:" + uuid));
+        logger.debug(entity.toString());
         return toDTO(entity);
     }
 
@@ -115,7 +116,6 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     if(grnd.speed != null) builder.speed(grnd.speed);
     if(grnd.buttons != null) builder.buttons(grnd.buttons);
     if(grnd.description != null) builder.description(grnd.description);
-    
     if(grnd.media != null && !grnd.media.isBlank()){
         Media media = mediaRepo.findByUuid(UUID.fromString(grnd.media))
             .orElseThrow(() -> new EntityNotFoundException("Media not found: " + grnd.media));
@@ -125,9 +125,9 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     }
     UUID userUuid = userRepo.findByUsername(user.getName()).orElseThrow(() -> 
             new EntityNotFoundException("User was not exists with username " + user.getName())).getUuid();
-    Grenade updated = builder.build();
+    Grenade updated = builder.ready(true).build();
     grenadeRepo.save(updated);
-    logger.info("Updated grenade: {}, by user: {}", uuid, userUuid);
+    logger.debug("Updated grenade: {}, by user: {}", uuid, userUuid);
     return toDTO(updated);
 }
 
@@ -143,8 +143,8 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
             user = userRepo.findByUuid(UUID.fromString(authorUuid)).orElseThrow(() -> new EntityNotFoundException("Entity not found with uuid:"+authorUuid)).getId();
         }
         Page<Grenade> page = grenadeRepo.findByFilter(pageable, map, grenade, user, name, userId);
-        logger.debug("");
         PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList() , page.getNumber() + 1, page.getTotalPages());
+        logger.debug("Filter retured: {}",pageDTO.toString());
         return pageDTO;
     }
 
@@ -153,20 +153,26 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         Long userId = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("Entity not found with username:" + username)).getId();
         Page<Grenade> page = grenadeRepo.findUnreadyByAuthor(pageable, userId);
         PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1, page.getTotalPages());
+        logger.debug("Unready retured: {}",pageDTO.toString());
         return pageDTO;
     }
 
     public void setReadyToGrenade(UUID uuid){
         grenadeRepo.setReadyTrueByUuid(uuid);
+        logger.debug("Ready set to: {}",uuid);
+
     }
 
     public void approve(UUID uuid) {
         grenadeRepo.setApprovedTrueByUuid(uuid);
+        logger.debug("Approve: {}",uuid);
     }
 
     public PageDTO<GrenadeResponse> getApproved(Pageable pageable, boolean isApproved){
         Page<Grenade> page = grenadeRepo.findApproved(pageable, isApproved);
-        return new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1, page.getTotalPages());
+        PageDTO<GrenadeResponse> pageDTO= new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1, page.getTotalPages());
+        logger.debug("Return approved : {}",pageDTO);
+        return pageDTO;
     }
 
     public List<GrenadeResponse> getByUser(String author) {

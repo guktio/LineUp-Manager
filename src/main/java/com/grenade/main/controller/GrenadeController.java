@@ -106,11 +106,13 @@ public class GrenadeController {
     @GetMapping("/unready")
     public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
                                                                 @RequestParam(defaultValue = "5") int s){
+        logger.info("PATCH {}/unready",api);
         return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}/ready")
     public ResponseEntity<GrenadeResponse> setReady(@PathVariable UUID id, @RequestBody ReadyDTO readyDTO){
+        logger.info("PATCH {}/{}/ready",api , id);
         grenadeService.setReadyToGrenade(id);
         return new ResponseEntity<>(grenadeService.getByUuid(id) ,HttpStatus.OK);
     }

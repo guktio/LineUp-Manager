@@ -21,12 +21,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grenade.main.dto.AuthResponse;
 import com.grenade.main.dto.ServerUserDTO;
+import com.grenade.main.dto.SteamProfileDTO;
+import com.grenade.main.dto.UserDTO;
 import com.grenade.main.entity.SteamProfile;
 import com.grenade.main.entity.User;
 import com.grenade.main.exception.SteamAuthException;
-import com.grenade.main.repo.SteamRepo;
 import com.grenade.main.repo.UserRepo;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -42,8 +44,6 @@ public class SteamService {
     private ObjectMapper mapper = new ObjectMapper();
     
     private final Logger logger = LoggerFactory.getLogger(SteamService.class);
-    private final SteamRepo steamRepo;
-    private final UserService userService;
     private final UserRepo userRepo;
 
     private final JwtProvider jwtProvider;
@@ -112,26 +112,43 @@ public class SteamService {
             String token = jwtProvider.generateToken(user.getUuid());
     
             logger.info("User {} logged in via Steam.", user.getUsername());
-    
+            
+            User exists = userRepo.findByUuid(user.getUuid()).orElseThrow(() -> new EntityNotFoundException("EntityNotFoundException"));
+
             return new AuthResponse(
-                    userService.findByUuid(user.getUuid()),
+                    toUserDTO(exists),
                     token
             );
     }
 
-    @SuppressWarnings("null")
+    public UserDTO toUserDTO(User user){
+        UserDTO.UserDTOBuilder userDTO = UserDTO.builder()
+                        .uuid(user.getUuid())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .createdAt(user.getCreatedAt());
+        if (user.getSteamProfile() != null) {
+            SteamProfileDTO steamProfileDTO = new SteamProfileDTO();
+            steamProfileDTO.setSteamId(user.getSteamProfile().getSteamId());
+            steamProfileDTO.setPersonaname(user.getSteamProfile().getPersonaname());
+            steamProfileDTO.setProfileurl(user.getSteamProfile().getProfileurl());
+            userDTO.profile(steamProfileDTO);
+        }
+        return userDTO.build();
+    }
+
     public User createSteamUser(String steamId){
         Map<String, String> playerInfo = getPlayerSummaries(steamId);
-        User user = User.builder().steamId(steamId).username(playerInfo.get("personaname")).build();
+        User user = User.builder().username(playerInfo.get("personaname")).build();
         SteamProfile profile = SteamProfile.builder()
+            .steamId(steamId)
             .personaname(playerInfo.get("personaname"))
             .profileurl(playerInfo.get("profileurl"))
             .user(user)
             .build();
-        userRepo.save(user);
-        steamRepo.save(profile);
         user.setSteamProfile(profile);
-        logger.info(user.toString());
+        userRepo.save(user);
+        logger.debug("Created user: {}",user.toString());
         return user;
     }
 
@@ -167,6 +184,7 @@ public class SteamService {
             Map<String, String> steamInfo= Map.of(
                         "personaname", player.path("personaname").asText(),
                         "profileurl", player.path("profileurl").asText());
+            logger.debug("Player summaries: {}",steamInfo.toString());
             return steamInfo;
         } catch (Exception e) {
             return Map.of("error",e.getMessage());

@@ -43,7 +43,6 @@ public class GrenadeServiceTest {
         User user = User.builder()
             .username("john")
             .password("encoded")
-            .steamId("steam123")
             .build();
 
         userRepo.save(user);
@@ -75,7 +74,6 @@ public class GrenadeServiceTest {
         User user = User.builder()
             .username("john")
             .password("encoded")
-            .steamId("steam123")
             .build();
 
         userRepo.save(user);

@@ -53,7 +53,7 @@ public class VideoThumbnailExtractor {
                 @SuppressWarnings("resource")
                 BufferedImage img = new Java2DFrameConverter().convert(frame);
                 ImageIO.write(img, "jpg", new File(uploadDirPath, outputImagePath));
-                logger.info("Thumbnail created in {}", outputImagePath);
+                logger.debug("Thumbnail created in {}", outputImagePath);
                 return outputImagePath;
             } catch(Exception e) {
                 e.printStackTrace();

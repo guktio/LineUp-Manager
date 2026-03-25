@@ -26,32 +26,31 @@ public class ServerFilter extends OncePerRequestFilter{
 
     private final ServerProvider serverProvider;
 
-@Override
-protected void doFilterInternal(@NonNull HttpServletRequest request, 
-                                @NonNull HttpServletResponse response,
-                                @NonNull FilterChain filterChain)
-        throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, 
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
+                throws ServletException, IOException {
+        if (!request.getRequestURI().startsWith("/api/game")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-    if (!request.getRequestURI().startsWith("/api/game")) {
+        String key = request.getHeader("X-Server-Key");
+        if (key == null || key.isBlank() || !serverProvider.validateKey(key)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Forbidden");
+            return;
+        }
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                key,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_GAME_SERVER"))
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         filterChain.doFilter(request, response);
-        return;
     }
-
-    String key = request.getHeader("X-Server-Key");
-    if (key == null || key.isBlank() || !serverProvider.validateKey(key)) {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.getWriter().write("Forbidden");
-        return;
-    }
-
-    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-            key,
-            null,
-            List.of(new SimpleGrantedAuthority("ROLE_GAME_SERVER"))
-    );
-
-    SecurityContextHolder.getContext().setAuthentication(auth);
-
-    filterChain.doFilter(request, response);
-}
 }

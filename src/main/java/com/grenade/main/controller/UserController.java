@@ -53,7 +53,8 @@ public class UserController {
     @Tag(name = "admin")
     @PutMapping("/{id}")
     public User update(@PathVariable UUID uuid, @RequestBody User user) {
-        return userService.fullUpdate(uuid, user);
+        logger.info("PUT {}/{}",api,uuid);
+        return userService.update(uuid, user);
     }
 
     @Operation(summary = "Create user")

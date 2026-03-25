@@ -3,14 +3,19 @@ package com.grenade.main.service;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.grenade.main.dto.SteamProfileDTO;
 import com.grenade.main.dto.UserDTO;
 import com.grenade.main.dto.UserRequest;
 import com.grenade.main.entity.User;
+import com.grenade.main.entity.User.RoleType;
 import com.grenade.main.repo.UserRepo;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +27,9 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
 
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder){
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder, SteamService steamService){
         super(userRepo);
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -41,67 +48,79 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
 
         User.UserBuilder usr = User.builder()
             .username(user.getUsername())
-            .email(user.getEmail())
-            .steamId(user.getSteamId());
+            .email(user.getEmail());
 
         if (user.getPassword() != null && !user.getPassword().isBlank()){
             usr.password(passwordEncoder.encode(user.getPassword()));
         }
 
-
-        // if (user.getSteamProfile() != null && !user.getSteamProfile().equals(null)){
-        //     usr.steamProfile(user.getSteamProfile());
-        // }
-
         User saved = userRepo.save(Objects.requireNonNull(usr.build(), "User builder returns null"));
+        logger.debug("User created: {}",saved.toString());
         return saved;
     }
 
     public boolean isUserExist(String steamId) {
+        logger.debug("Is user exists(?): {}",steamId);
         return userRepo.existsBySteamId(steamId);
     }
 
     public User getBySteamId(String steamId){
+        logger.debug("Load user by Steam Id: {}",steamId);
         return userRepo.findBySteamId(steamId).orElseThrow(() -> new EntityNotFoundException("User was not found with steamId "+ steamId));
     }
 
-    @SuppressWarnings("null")
-    public User fullUpdate(UUID uuid, User user) {
-        UUID userUuid = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUuid();
+    @Transactional
+    public User update(UUID uuid, User user) {
+        User userContext = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userUuid = userContext.getUuid();
         User existing = userRepo.findByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: "+ uuid.toString()));
 
         boolean isOwner = userUuid.equals(existing.getUuid());
-        boolean isAdmin = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getRole().equals("ROLE_ADMIN");
+        boolean isAdmin = userContext.getRole().equals(RoleType.ADMIN);
         if (!isOwner && !isAdmin){
             throw new AccessDeniedException("You can only update your own profile");
         }
 
-        User newUser = User.builder()
-                            .username(user.getUsername())
-                            .email(user.getEmail())
-                            .steamId(user.getSteamId())
-                            .role(user.getRole())
-                            .steamProfile(user.getSteamProfile())
-                            .uuid(user.getUuid())
-                            .build();
-        return userRepo.save(newUser);
+        if (user.getUsername() != null) {
+            existing.setUsername(user.getUsername());
+        }
+
+        if (user.getEmail() != null) {
+            existing.setEmail(user.getEmail());
+        }
+
+        if (user.getSteamProfile() != null) {
+            existing.setSteamProfile(user.getSteamProfile());
+        }
+
+        if (isAdmin && user.getRole() != null) {
+            existing.setRole(user.getRole());
+        }
+        logger.debug("User with uuid: {} updated with fields: {}", uuid, existing);
+        return existing;
     }
 
     @Override
     public UserDTO toDTO(User user){
-        UserDTO userDTO = UserDTO.builder()
-                        .username(user.getUsername())
-                        .steamId(user.getSteamId())
-                        .email(user.getEmail())
+        UserDTO.UserDTOBuilder userDTO = UserDTO.builder()
                         .uuid(user.getUuid())
+                        .username(user.getUsername())
                         .role(user.getRole())
-                        .createdAt(user.getCreatedAt())
-                        .build();
-        return userDTO;
+                        .email(user.getEmail())
+                        .createdAt(user.getCreatedAt());
+        if (user.getSteamProfile() != null) {
+            SteamProfileDTO steamProfileDTO = new SteamProfileDTO();
+            steamProfileDTO.setSteamId(user.getSteamProfile().getSteamId());
+            steamProfileDTO.setPersonaname(user.getSteamProfile().getPersonaname());
+            steamProfileDTO.setProfileurl(user.getSteamProfile().getProfileurl());
+            userDTO.profile(steamProfileDTO);
+        }
+        return userDTO.build();
     }
 
     public UserDTO findByUuid(UUID uuid){
+        logger.debug("Find user with uuid: {}", uuid);
         return userRepo.findByUuid(uuid)
                 .map(this::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: "+uuid));
