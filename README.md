@@ -64,7 +64,7 @@ cd cs2-lineup-api
 ```
 2. **Build the project:**
 ```bash
-python build_and_deploy.py 
+python build_and_deploy.py --name=IMAGE_NAME --tag=IMAGE_TAG --user=REMOTE_USER --host=REMOTE_HOST
 ```
 3. **Load docker image on your server**
 ```bash
