@@ -33,7 +33,8 @@ Python 3.12+
 Maven 3.8+
 Docker 
 FFmpeg 
-Любые дополнительные Python-библиотеки для build_and_deploy.py
+Steam API key
+>**Notice:** To find Steam API key visit https://steamcommunity.com/dev/apikey 
 
 ## Running the Project Locally
 
@@ -74,4 +75,3 @@ docker load -i lineup.tar
 ```bash
 docker run -d -p 8080:8080 -v /data/lineup/media:/app/uploads -e STEAM_API_KEY=YOUR_STEAM_API_KEY --name lineup lineup:latest
 ```
->**Notice:** To find Steam API key visit https://steamcommunity.com/dev/apikey 
