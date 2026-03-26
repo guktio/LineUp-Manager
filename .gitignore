@@ -42,4 +42,4 @@ build/
 *.jfr
 docker-compose.ymlы
 
-!**/src/main/resources/**.properies
+.env
