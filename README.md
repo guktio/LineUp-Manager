@@ -72,5 +72,6 @@ docker load -i lineup.tar
 ```
 4. **Run docker image**
 ```bash
-  docker run -d -p 8080:8080 -v /data/lineup/media:/app/uploads lineup:latest
+docker run -d -p 8080:8080 -v /data/lineup/media:/app/uploads -e STEAM_API_KEY=YOUR_STEAM_API_KEY --name lineup lineup:latest
 ```
+>**Notice:** To find Steam API key visit https://steamcommunity.com/dev/apikey 
