@@ -1,6 +1,6 @@
 # CS2 Lineup REST API
 
-### Built with: Spring Boot, Lombok, Hibernate, JWT, Spring Security
+### Built with: Spring Boot, Lombok, JPA/Hibernate, JWT, Spring Security
 ### Testing: Spring Boot Test, JUnit Jupiter, K6
 
 ## Overview
@@ -28,9 +28,9 @@ The CS2 Lineup REST API allows users to create, share, and explore Counter-Strik
   6. Anothe user can star it and than use it in their game
 
 ## Requirments
-Java 17+
+Java 21+
 Python 3.12+
-Maven 3.8+
+Maven 3.9+
 Docker 
 FFmpeg 
 Steam API key
@@ -41,8 +41,8 @@ Steam API key
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cs2-lineup-api.git
-cd cs2-lineup-api
+git clone https://github.com/guktio/LineUp-Manager.git
+cd LineUp-Manager
 ```
 2. **Build the project:**
  ```bash
@@ -60,8 +60,8 @@ cd cs2-lineup-api
  >**Notice:** Before using the script, make sure to set up all variables according to your environment.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cs2-lineup-api.git
-cd cs2-lineup-api
+git clone https://github.com/guktio/LineUp-Manager.git
+cd LineUp-Manager
 ```
 2. **Build the project:**
 ```bash
