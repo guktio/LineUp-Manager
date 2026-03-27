@@ -70,7 +70,7 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
     }
 
     @Transactional
-    public User update(UUID uuid, User user) {
+    public User update(UUID uuid, UserRequest user) {
         User userContext = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UUID userUuid = userContext.getUuid();
         User existing = userRepo.findByUuid(uuid)
@@ -90,12 +90,12 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
             existing.setEmail(user.getEmail());
         }
 
-        if (user.getSteamProfile() != null) {
-            existing.setSteamProfile(user.getSteamProfile());
+        if (existing.getSteamProfile() != null) {
+            existing.setSteamProfile(existing.getSteamProfile());
         }
 
-        if (isAdmin && user.getRole() != null) {
-            existing.setRole(user.getRole());
+        if (isAdmin && existing.getRole() != null) {
+            existing.setRole(existing.getRole());
         }
         logger.debug("User with uuid: {} updated with fields: {}", uuid, existing);
         return existing;

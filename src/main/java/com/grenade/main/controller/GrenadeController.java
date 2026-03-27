@@ -49,24 +49,24 @@ public class GrenadeController {
     private final MediaService mediaService;
     private static final Logger logger = LoggerFactory.getLogger(GrenadeController.class);
 
-    @Operation(summary = "Create grenade")
     @Tag(name = "user")
+    @Operation(summary = "Create grenade")
     @PostMapping()
     public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade) {
         logger.info("POST {}" ,api);
         return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Update grenade")
     @Tag(name = "user")
+    @Operation(summary = "Update grenade")
     @PutMapping("/{id}")
     public ResponseEntity<GrenadeResponse> update(@PathVariable UUID id, @RequestBody GrenadeRequest grenade) {
         logger.info("PUT {} Grenade info:",api,grenade);
         return new ResponseEntity<>(grenadeService.update(id, grenade), HttpStatus.OK);
     }
 
-    @Operation(summary = "Upload video for grenade")
     @Tag(name = "user")
+    @Operation(summary = "Upload video for grenade")
     @PostMapping(value = "/video",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,16 +75,16 @@ public class GrenadeController {
         return new ResponseEntity<>(mediaService.create(file), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get grenade by uuid")
     @Tag(name = "public")
+    @Operation(summary = "Get grenade by uuid")
     @GetMapping("/{uuid}")
     public ResponseEntity<GrenadeResponse> getByUuid(@PathVariable UUID uuid){
         logger.info("GET {}/{}",api,uuid);
         return new ResponseEntity<>(grenadeService.getByUuid(uuid), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get filtered Grenades")
     @Tag(name = "public")
+    @Operation(summary = "Get filtered Grenades")
     @GetMapping
     public ResponseEntity<PageDTO<GrenadeResponse>> getByFilter(@RequestParam(defaultValue = "1") int p,
                                                                 @RequestParam(defaultValue = "5") int s,
@@ -103,6 +103,8 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getByFilter(PageRequest.of(p-1, s, sort), map, grenade, sortdirection, userUuid, name, likedByUserId), HttpStatus.OK);
     }
 
+    @Tag(name = "admin")
+    @Operation(summary = "Get user unredy Grenades")
     @GetMapping("/unready")
     public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
                                                                 @RequestParam(defaultValue = "5") int s){
@@ -110,6 +112,8 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
     }
 
+    @Tag(name = "admin")
+    @Operation(summary = "Set user grenade ready")
     @PatchMapping("/{id}/ready")
     public ResponseEntity<GrenadeResponse> setReady(@PathVariable UUID id, @RequestBody ReadyDTO readyDTO){
         logger.info("PATCH {}/{}/ready",api , id);
@@ -117,8 +121,8 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getByUuid(id) ,HttpStatus.OK);
     }
     
-    @Operation(summary = "Delete grenade by uuid")
     @Tag(name = "user")
+    @Operation(summary = "Delete grenade by uuid")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         logger.info("DELETE {}/{}",api , id);
@@ -126,8 +130,8 @@ public class GrenadeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Operation(summary = "Get unaproved grenades")
     @Tag(name = "admin")
+    @Operation(summary = "Get unaproved grenades")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unapproved")
     public ResponseEntity<PageDTO<GrenadeResponse>> getNotApprovedGrenades(@RequestParam(defaultValue = "1") int p,
@@ -138,8 +142,8 @@ public class GrenadeController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Approve grenade")
     @Tag(name = "admin")
+    @Operation(summary = "Approve grenade")
     @GetMapping("/unapproved/{uuid}")
     public ResponseEntity<Void> approveGrenade(@PathVariable UUID uuid){
         logger.info("GET {}/admin/{}",api, uuid);

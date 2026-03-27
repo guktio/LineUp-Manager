@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 public class StarsController {
     
     private StarsService starsService;
+    
     private final Logger logger = LoggerFactory.getLogger(StarsController.class);
 
     private static final String api = "/api/star";

@@ -160,7 +160,6 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     public void setReadyToGrenade(UUID uuid){
         grenadeRepo.setReadyTrueByUuid(uuid);
         logger.debug("Ready set to: {}",uuid);
-
     }
 
     public void approve(UUID uuid) {

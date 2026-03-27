@@ -22,6 +22,8 @@ import com.grenade.main.service.GrenadeService;
 import com.grenade.main.service.SteamService;
 import com.grenade.main.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,11 +33,16 @@ import lombok.RequiredArgsConstructor;
 public class ServerController {
 
     private final GrenadeService grenadeService;
+
     private final UserService userService;
+
     private final SteamService steamService;
 
     private static final Logger logger = LoggerFactory.getLogger(ServerController.class);
 
+    
+    @Tag(name = "server")
+    @Operation(summary = "Create lineup from server")
     @PostMapping("/lineup/new")
     public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade){
         logger.info("POST /api/game/lineup/new {}", grenade.toString());
@@ -51,12 +58,16 @@ public class ServerController {
         return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.OK);
     }
 
+    @Tag(name = "server")
+    @Operation(summary = "If user exists in database")
     @PostMapping("/user/steamId")
     public ResponseEntity<Boolean> isSteamID(@RequestBody String steamId){
         logger.info(steamId);
         return new ResponseEntity<>(userService.isUserExist(steamId), HttpStatus.OK);
     }
 
+    @Tag(name = "server")
+    @Operation(summary = "Creates user context")
     @PostMapping("/user/auth")
     public ResponseEntity<AuthResponse> authUser(@RequestBody ServerUserDTO steamId){
         logger.info("POST /api/game/user/auth steamID={}",steamId);

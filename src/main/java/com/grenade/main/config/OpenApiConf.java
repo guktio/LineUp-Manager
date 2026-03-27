@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
         @Tag(name = "auth"),
         @Tag(name = "user"),
         @Tag(name = "admin"),
+        @Tag(name = "server"),
         @Tag(name = "public")
     }
 )

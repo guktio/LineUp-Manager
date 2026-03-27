@@ -52,14 +52,14 @@ public class UserController {
     @Operation(summary = "Update user")
     @Tag(name = "admin")
     @PutMapping("/{id}")
-    public User update(@PathVariable UUID uuid, @RequestBody User user) {
+    public User update(@PathVariable UUID uuid, @RequestBody UserRequest user) {
         logger.info("PUT {}/{}",api,uuid);
         return userService.update(uuid, user);
     }
 
     @Operation(summary = "Create user")
-    @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "admin")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public User create(@RequestBody UserRequest user) {
         logger.info("POST {}",api);
