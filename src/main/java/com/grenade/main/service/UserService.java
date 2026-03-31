@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         }
 
         if (user.getSteamId() != null) {
+            
             if (userRepo.existsBySteamId(user.getSteamId())) {
                 throw new RuntimeException("User with steamId already exists");
             }
@@ -124,5 +126,18 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         return userRepo.findByUuid(uuid)
                 .map(this::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: "+uuid));
+    }
+
+    public void deleteUser(UUID uuid){
+        if(uuid == null) return;
+        Authentication user = SecurityContextHolder.getContext().getAuthentication();
+        User existing = userRepo.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Entity not found: " + uuid));
+        boolean isOwner = existing.getUsername().equals(user.getName());
+        boolean isAdmin = user.getAuthorities().stream()
+        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        if(isOwner || isAdmin){
+            delete(uuid);
+        }
     }
 }

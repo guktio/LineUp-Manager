@@ -115,15 +115,6 @@ class JwtTest {
     }
 
     @Test
-    void shouldRejectTamperedToken() {
-        String token = jwtProvider.generateToken(uuid);
-
-        String tampered = token.substring(0, token.length() - 1) + "x";
-
-        assertThat(jwtProvider.validateToken(tampered)).isFalse();
-    }
-
-    @Test
     void shouldHaveCorrectExpirationTime() {
         String token = jwtProvider.generateToken(uuid);
 

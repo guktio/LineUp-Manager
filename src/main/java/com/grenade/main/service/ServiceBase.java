@@ -3,7 +3,6 @@ package com.grenade.main.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,23 +27,21 @@ public abstract class ServiceBase<T, D, ID, R extends RepoBase<T, ID>>{
                 .orElseThrow(() -> new EntityNotFoundException("Grenade not found with id: " + uuid));
     }
 
+    protected String getCurrentUsername() {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+    }
+
     public PageDTO<D> getAll(@NonNull Pageable pageable){
         Page<T> page = repository.findAll(pageable);
         return new PageDTO<D>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1,page.getTotalPages());
     }
-    
-    public boolean isAuthor(String username){
-        String current = SecurityContextHolder.getContext().getAuthentication().getName();
-        return current.equals(username);
-    }
 
-    @Transactional
+   @Transactional
     public void delete(@NonNull ID uuid){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (isAuthor(username)) {
-            repository.deleteByUuid(uuid);
-        } else {
-            throw new AccessDeniedException("You are not allowed to delete this grenade");
-        }
+        T entity = repository.findByUuid(uuid)
+                .orElseThrow(() -> new EntityNotFoundException());
+        repository.delete(entity);
     }
 }

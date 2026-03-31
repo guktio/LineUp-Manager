@@ -89,6 +89,6 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         logger.info("DELETE {}/{}",api,id);
-        userService.delete(Objects.requireNonNull(id));
+        userService.deleteUser(Objects.requireNonNull(id));
     }
 }

@@ -216,4 +216,17 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         }
         return dto.build();
     }
+
+    public void deleteGrenade(UUID uuid) {
+        if(uuid == null) return;
+        Authentication user = SecurityContextHolder.getContext().getAuthentication();
+        Grenade existing = grenadeRepo.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Entity not found: " + uuid));
+        boolean isOwner = existing.getAuthor().getUsername().equals(user.getName());
+        boolean isAdmin = user.getAuthorities().stream()
+        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        if(isOwner || isAdmin){
+            delete(uuid);
+        }
+    }
 }

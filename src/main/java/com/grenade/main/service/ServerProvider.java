@@ -1,25 +1,27 @@
 package com.grenade.main.service;
 
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.grenade.main.repo.UserRepo;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
-@RequiredArgsConstructor
 public class ServerProvider {
 
-    private final UserRepo userRepo;
+    private UserRepo userRepo;
 
-    private final String secret = "csWW";
+    private String secret;
 
-    // public ServerProvider( @Value("${server.key}") String secret){
-    //     this.secret = secret;
-    // }
+    public ServerProvider( @Value("${server.key}") 
+                            String secret,
+                            UserRepo userRepo){
+        this.secret = secret;
+        this.userRepo = userRepo;
+    }
 
     public boolean validateKey(String key){
         String[] parts = key.split("-");
+        if (parts.length < 2) return false;
         String userId = parts[1];
         Boolean exists = userRepo.existsBySteamId(userId);
         if (parts[0].startsWith(secret) && exists) {
@@ -27,5 +29,4 @@ public class ServerProvider {
         } 
         return false;
     }
-    
 }

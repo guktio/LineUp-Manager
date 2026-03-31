@@ -126,7 +126,7 @@ public class GrenadeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         logger.info("DELETE {}/{}",api , id);
-        grenadeService.delete(Objects.requireNonNull(id));
+        grenadeService.deleteGrenade(Objects.requireNonNull(id));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
