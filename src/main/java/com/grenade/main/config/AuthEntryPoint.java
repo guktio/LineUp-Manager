@@ -21,7 +21,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
 
         response.getWriter().write("""
             {
-              "Error": "Unauthorized "
+              "Error": "Unauthorized"
             }
         """);
     }

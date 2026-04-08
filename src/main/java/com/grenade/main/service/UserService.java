@@ -30,7 +30,7 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder, SteamService steamService){
+    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder){
         super(userRepo);
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -92,13 +92,13 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
             existing.setEmail(user.getEmail());
         }
 
-        if (existing.getSteamProfile() != null) {
-            existing.setSteamProfile(existing.getSteamProfile());
-        }
+        // if (existing.getSteamProfile() != null) {
+        //     existing.setSteamProfile(existing.getSteamProfile());
+        // }
 
-        if (isAdmin && existing.getRole() != null) {
-            existing.setRole(existing.getRole());
-        }
+        // if (isAdmin && existing.getRole() != null) {
+        //     existing.setRole(existing.getRole());
+        // }
         logger.debug("User with uuid: {} updated with fields: {}", uuid, existing);
         return existing;
     }

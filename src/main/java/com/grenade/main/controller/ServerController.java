@@ -38,7 +38,7 @@ public class ServerController {
 
     private final SteamService steamService;
 
-    private static final Logger logger = LoggerFactory.getLogger(ServerController.class);
+    private Logger logger = LoggerFactory.getLogger(ServerController.class);
 
     
     @Tag(name = "server")

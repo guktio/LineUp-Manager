@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,5 +64,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SteamAuthException.class)
     public ResponseEntity<ErrorResponse> handleSteamAuthException(SteamAuthException ex) {
         return buildResponse(ex, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        return buildResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }

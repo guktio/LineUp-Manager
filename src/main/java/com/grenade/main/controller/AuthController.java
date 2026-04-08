@@ -21,32 +21,33 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @Tag(name = "auth")
 @RequestMapping("/api/auth")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
     private final SteamService steamService;
-    private final Logger logger = LoggerFactory.getLogger(AuthController.class); 
-    private static final String api = "/api/auth";
+    private Logger logger = LoggerFactory.getLogger(AuthController.class); 
+    private static String api = "/api/auth";
 
     @Operation(summary = "Registration for user")
     @ApiResponses(
         @ApiResponse(responseCode = "200", description = "User registrated succesfully")
     )
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest authRequest) {
         logger.info("POST {}/register",api);
         return ResponseEntity.ok(authService.register(authRequest));
     }
 
     @Operation(summary = "Login for user")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         logger.info("POST {}/login",api);
         return ResponseEntity.ok(authService.login(authRequest));
     }

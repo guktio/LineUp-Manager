@@ -132,16 +132,18 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
 }
 
     public PageDTO<GrenadeResponse> getByFilter(Pageable pageable, Grenade.MapType map,
-                                    Grenade.GrenadeType grenade, String sortDirection,
-                                    String authorUuid, String name, String likedByUserId) {
+                                    Grenade.GrenadeType grenade,
+                                    UUID authorUuid, String name, UUID likedByUserId) {
         Long userId = null;
         if (likedByUserId != null){
-            userId = userRepo.findByUuid(UUID.fromString(likedByUserId)).orElseThrow(() -> new EntityNotFoundException("Liked by user was not found with uuid:" + likedByUserId)).getId();
+            userId = userRepo.findByUuid(likedByUserId).orElseThrow(() -> new EntityNotFoundException("Liked by user was not found with uuid:" + likedByUserId)).getId();
         }
+
         Long user = null;
         if (authorUuid != null) {
-            user = userRepo.findByUuid(UUID.fromString(authorUuid)).orElseThrow(() -> new EntityNotFoundException("Entity not found with uuid:"+authorUuid)).getId();
+            user = userRepo.findByUuid(authorUuid).orElseThrow(() -> new EntityNotFoundException("Entity not found with uuid:"+authorUuid)).getId();
         }
+
         Page<Grenade> page = grenadeRepo.findByFilter(pageable, map, grenade, user, name, userId);
         PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList() , page.getNumber() + 1, page.getTotalPages());
         logger.debug("Filter retured: {}",pageDTO.toString());

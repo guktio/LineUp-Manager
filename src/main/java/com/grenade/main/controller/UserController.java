@@ -27,19 +27,19 @@ import com.grenade.main.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
 @SecurityRequirement(name = "token")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
-    private final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private static final String api = "/api/users";
+    private static String api = "/api/users";
 
     @Operation(summary = "Get user by username")
     @Tag(name = "public")
@@ -50,8 +50,8 @@ public class UserController {
     }
     
     @Operation(summary = "Update user")
-    @Tag(name = "admin")
-    @PutMapping("/{id}")
+    @Tag(name = "user")
+    @PutMapping("/{uuid}")
     public User update(@PathVariable UUID uuid, @RequestBody UserRequest user) {
         logger.info("PUT {}/{}",api,uuid);
         return userService.update(uuid, user);

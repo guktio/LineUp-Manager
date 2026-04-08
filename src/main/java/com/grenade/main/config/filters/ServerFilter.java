@@ -38,8 +38,8 @@ public class ServerFilter extends OncePerRequestFilter{
 
         String key = request.getHeader("X-Server-Key");
         if (key == null || key.isBlank() || !serverProvider.validateKey(key)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("Forbidden");
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
             return;
         }
 

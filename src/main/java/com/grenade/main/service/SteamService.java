@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SteamService {
 
-    @Value("${STEAM_API_KEY}")
+    @Value("${STEAM_API_KEY:}")
     private String API_KEY;
     
     private static String BASE_URL = "https://api.steampowered.com";

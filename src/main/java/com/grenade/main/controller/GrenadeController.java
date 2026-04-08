@@ -35,19 +35,19 @@ import com.grenade.main.service.MediaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/grenades")
 @SecurityRequirement(name = "token")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GrenadeController {
 
-    private static final String api = "/api/grenades";
+    private static String api = "/api/grenades";
 
     private final GrenadeService grenadeService;
     private final MediaService mediaService;
-    private static final Logger logger = LoggerFactory.getLogger(GrenadeController.class);
+    private Logger logger = LoggerFactory.getLogger(GrenadeController.class);
 
     @Tag(name = "user")
     @Operation(summary = "Create grenade")
@@ -91,19 +91,19 @@ public class GrenadeController {
                                                                 @RequestParam(required = false) Grenade.MapType map,
                                                                 @RequestParam(required = false) Grenade.GrenadeType grenade,
                                                                 @RequestParam(required = false) String sortdirection,
-                                                                @RequestParam(required = false) String userUuid,
+                                                                @RequestParam(required = false) UUID userUuid,
                                                                 @RequestParam(required = false) String name,
-                                                                @RequestParam(required = false) String likedByUserId) {
-         Sort sort = Sort.by(Sort.Direction.DESC, "stars");
+                                                                @RequestParam(required = false) UUID likedByUserId) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "stars");
         if (sortdirection != null && !sortdirection.isBlank()) {
             sort = Sort.by(sortdirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "stars");
         }
         logger.info("GET {} Params: p={}, s={}, map={}, grenade={}, sortDirection={}, userUuid={}, name={}, likedByUserId={}", 
                                 api, p , s, map, grenade, sortdirection, userUuid, name, likedByUserId);
-        return new ResponseEntity<>(grenadeService.getByFilter(PageRequest.of(p-1, s, sort), map, grenade, sortdirection, userUuid, name, likedByUserId), HttpStatus.OK);
+        return new ResponseEntity<>(grenadeService.getByFilter(PageRequest.of(p-1, s, sort), map, grenade, userUuid, name, likedByUserId), HttpStatus.OK);
     }
 
-    @Tag(name = "admin")
+    @Tag(name = "user")
     @Operation(summary = "Get user unredy Grenades")
     @GetMapping("/unready")
     public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
@@ -112,7 +112,7 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
     }
 
-    @Tag(name = "admin")
+    @Tag(name = "user")
     @Operation(summary = "Set user grenade ready")
     @PatchMapping("/{id}/ready")
     public ResponseEntity<GrenadeResponse> setReady(@PathVariable UUID id, @RequestBody ReadyDTO readyDTO){
@@ -141,9 +141,9 @@ public class GrenadeController {
         return new ResponseEntity<>(grenadeService.getApproved(PageRequest.of(p,s), isApproved) ,HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "admin")
     @Operation(summary = "Approve grenade")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unapproved/{uuid}")
     public ResponseEntity<Void> approveGrenade(@PathVariable UUID uuid){
         logger.info("GET {}/admin/{}",api, uuid);

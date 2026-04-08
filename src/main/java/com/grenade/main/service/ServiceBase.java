@@ -38,7 +38,7 @@ public abstract class ServiceBase<T, D, ID, R extends RepoBase<T, ID>>{
         return new PageDTO<D>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1,page.getTotalPages());
     }
 
-   @Transactional
+    @Transactional
     public void delete(@NonNull ID uuid){
         T entity = repository.findByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException());

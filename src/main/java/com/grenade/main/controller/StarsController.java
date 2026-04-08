@@ -17,18 +17,18 @@ import com.grenade.main.service.StarsService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/star")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class StarsController {
     
-    private StarsService starsService;
+    private final StarsService starsService;
     
-    private final Logger logger = LoggerFactory.getLogger(StarsController.class);
+    private Logger logger = LoggerFactory.getLogger(StarsController.class);
 
-    private static final String api = "/api/star";
+    private static String api = "/api/star";
 
     @Operation(summary = "Star grenade")
     @Tag(name = "user")
