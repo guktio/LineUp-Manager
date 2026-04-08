@@ -50,7 +50,7 @@ cd LineUp-Manager
 ```
 3. **Run the project:**
 ```bash
-  mvn spring-boot:run -Dspring-boot.run.arguments="--STEAM_API_KEY=YOUR_STEAM_KEY"
+  mvn spring-boot:run -Pprod -Dspring-boot.run.arguments="--STEAM_API_KEY=YOUR_STEAM_KEY"
 ```
   **Access the API documentation:**
   http://localhost:8080/swagger-ui/index.html
