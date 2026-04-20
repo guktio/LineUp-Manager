@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.grenade.main.dto.AuthRequest;
 import com.grenade.main.dto.AuthResponse;
 import com.grenade.main.service.AuthService;
-import com.grenade.main.service.SteamService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
-    private final SteamService steamService;
+
     private Logger logger = LoggerFactory.getLogger(AuthController.class); 
     private static String api = "/api/auth";
 
@@ -56,6 +55,6 @@ public class AuthController {
     @PostMapping("/steam")
     public ResponseEntity<AuthResponse> loginViaSteam(@RequestBody Map<String,String> params) {
         logger.info("GET {}/steam", api);
-        return ResponseEntity.ok(steamService.steamResponse(params));
+        return ResponseEntity.ok(authService.loginWithSteam(params));
     }
 }

@@ -1,5 +1,6 @@
 package com.grenade.main.service;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -71,5 +72,24 @@ public class AuthService {
         } catch (UsernameNotFoundException e) {
             throw new UsernameNotFoundException("User not found");
         }
+    }
+    
+    public AuthResponse loginWithSteam(Map<String,String> params) {
+
+        User user = userService.findOrCreateBySteamId(params);
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                    user,
+                    null,
+                    user.getAuthorities()
+        );
+    
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    
+        String token = jwtProvider.generateToken(user.getUuid());
+    
+        logger.info("User {} logged in via Steam.", user.getUsername());
+            
+        return new AuthResponse(userService.toDTO(user), token);
     }
 }

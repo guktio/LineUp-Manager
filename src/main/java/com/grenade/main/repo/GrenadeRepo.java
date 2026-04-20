@@ -43,7 +43,6 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
 
     List<Grenade> findByAuthor(User author);
 
-
     @Query("""
             SELECT g FROM Grenade g
             WHERE g.author.id = :author

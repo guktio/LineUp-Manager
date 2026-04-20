@@ -1,5 +1,6 @@
 package com.grenade.main.service;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,14 +27,18 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
 
     private final UserRepo userRepo;
 
+    private final SteamService steamService;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder){
+    public UserService(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder, SteamService steamService){
         super(userRepo);
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.steamService = steamService;
+
     }
 
     public User create(UserRequest user){
@@ -139,5 +144,12 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         if(isOwner || isAdmin){
             delete(uuid);
         }
+    }
+
+    public User findOrCreateBySteamId(Map<String,String> params) {
+        String steamId = steamService.validateSteamOpenIdResponse(params);
+        User user = userRepo.findBySteamId(steamId)
+                    .orElseGet(() -> steamService.createSteamUser(steamId));
+        return user;
     }
 }

@@ -13,13 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.grenade.main.dto.AuthResponse;
 import com.grenade.main.dto.GrenadeRequest;
 import com.grenade.main.dto.GrenadeResponse;
-import com.grenade.main.dto.ServerUserDTO;
 import com.grenade.main.entity.User;
 import com.grenade.main.service.GrenadeService;
-import com.grenade.main.service.SteamService;
 import com.grenade.main.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +32,6 @@ public class ServerController {
     private final GrenadeService grenadeService;
 
     private final UserService userService;
-
-    private final SteamService steamService;
 
     private Logger logger = LoggerFactory.getLogger(ServerController.class);
 
@@ -66,11 +61,11 @@ public class ServerController {
         return new ResponseEntity<>(userService.isUserExist(steamId), HttpStatus.OK);
     }
 
-    @Tag(name = "server")
-    @Operation(summary = "Creates user context")
-    @PostMapping("/user/auth")
-    public ResponseEntity<AuthResponse> authUser(@RequestBody ServerUserDTO steamId){
-        logger.info("POST /api/game/user/auth steamID={}",steamId);
-        return new ResponseEntity<AuthResponse>(steamService.loginWithSteam(steamId), HttpStatus.OK);
-    }
+    // @Tag(name = "server")
+    // @Operation(summary = "Creates user context")
+    // @PostMapping("/user/auth")
+    // public ResponseEntity<AuthResponse> authUser(@RequestBody String steamId){
+    //     logger.info("POST /api/game/user/auth steamID={}",steamId);
+    //     return new ResponseEntity<AuthResponse>(steamService.loginWithSteam(steamId), HttpStatus.OK);
+    // }
 }
