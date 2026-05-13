@@ -42,19 +42,20 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
     }
 
     public User create(UserRequest user){
-        if (userRepo.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email taken by another account");
-        }
-
         if (user.getSteamId() != null) {
-            
             if (userRepo.existsBySteamId(user.getSteamId())) {
                 throw new RuntimeException("User with steamId already exists");
             }
         }
-
+        if(user.getEmail() != null){
+            if (userRepo.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("Email taken by another account");
+            }
+        }
+        String username = user.getEmail().split("@")[0];
+ 
         User.UserBuilder usr = User.builder()
-            .username(user.getUsername())
+            .username(username)
             .email(user.getEmail());
 
         if (user.getPassword() != null && !user.getPassword().isBlank()){
@@ -66,7 +67,7 @@ public class UserService extends ServiceBase<User, UserDTO, UUID, UserRepo>{
         return saved;
     }
 
-    public boolean isUserExist(String steamId) {
+    public boolean isUserExistBySteamId(String steamId) {
         logger.debug("Is user exists(?): {}",steamId);
         return userRepo.existsBySteamId(steamId);
     }

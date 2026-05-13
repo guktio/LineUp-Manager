@@ -1,112 +1,160 @@
 package com.grenade.main.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.grenade.main.dto.UserDTO;
 import com.grenade.main.dto.UserRequest;
-import com.grenade.main.entity.User;
 import com.grenade.main.repo.UserRepo;
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
+import jakarta.persistence.EntityNotFoundException;
+
+import com.grenade.main.entity.SteamProfile;
+import com.grenade.main.entity.User;
+
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private Environment env;
-
-    @Test
-    void shouldUseTestProfile() {
-        assertThat(env.getActiveProfiles()).contains("test");
-    }
     
+    @Mock UserRepo userRepo;
+
+    @Mock SteamService steamService;
+
+    @Mock BCryptPasswordEncoder passwordEncoder;
+
+    @InjectMocks UserService userService;
+
     @Test
-    void create_shouldSaveUser_UserDoesNotExist() {
-        UserRequest input = UserRequest.builder()
-                .username("john")
-                .password("123")
-                .email("testmail@mail.com")
-                .build();
+    void shouldReturnTrue() {
+        String steamId = "321";
 
-        User result = userService.create(input);
+        when(userRepo.existsBySteamId(steamId)).thenReturn(true);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getUsername()).isEqualTo("john");
+        boolean result = userService.isUserExistBySteamId(steamId);
 
-        assertThat(passwordEncoder.matches("123", result.getPassword())).isTrue();
-
-        User fromDb = userRepo.findByUuid(result.getUuid()).orElseThrow();
-        assertThat(fromDb.getUsername()).isEqualTo("john");
+        assertTrue(result);
+        verify(userRepo).existsBySteamId(steamId);
     }
 
     @Test
-    void create_shouldNotSaveUser_UserDoesExist() {
-        UserRequest input = UserRequest.builder()
-                .username("john")
-                .password("123")
-                .email("testmail@mail.com")
-                .build();
-        userService.create(input);
-        
-        UserRequest input2 = UserRequest.builder()
-                .username("johnasdasd")
-                .password("123123123123123")
-                .email("testmail@mail.com")
-                .build();
-        System.out.println(input2.toString());
-        assertThrows(RuntimeException.class, () -> {
-            userService.create(input2);
-        });
+    void shouldThrowException() {
+        String steamId = "321";
+
+        when(userRepo.existsBySteamId(steamId)).thenReturn(false);
+
+        boolean result = userService.isUserExistBySteamId(steamId);
+
+        assertFalse(result);
+        verify(userRepo).existsBySteamId(steamId);
     }
 
-    //need to add fake context user
-    // @Test
-    // void create_shouldUpdate_ExistsUser() {
-    //     User appUser = new User();
-    //     appUser.setUsername("john");
-    //     appUser.setPassword("123");
-    //     appUser.setEmail("testmail@mail.com");
+    @Test
+    void shouldReturnUserBySteamId(){
+        SteamProfile steam = SteamProfile
+                            .builder()
+                            .steamId("123")
+                            .build(); 
+        User user = new User();
+        user.setSteamProfile(steam);
 
-    //     SecurityContextHolder.getContext().setAuthentication(
-    //             new UsernamePasswordAuthenticationToken(appUser, null, List.of())
-    //     );
+        when(userRepo.findBySteamId(steam.getSteamId()))
+                .thenReturn(Optional.of(user));
 
-    //     UserRequest input = UserRequest.builder()
-    //             .username("john")
-    //             .password("123")
-    //             .email("testmail@mail.com")
-    //             .build();
-    //     User saved = userService.create(input);
+        User result = userService.getBySteamId(steam.getSteamId());
 
-    //     UserRequest input2 = UserRequest.builder()
-    //             .username("john2")
-    //             .password("123")
-    //             .email("testmail@mail.com")
-    //             .build();
-    //     User result = userService.update(saved.getUuid(), input2);
+        assertEquals(user, result);
+        verify(userRepo).findBySteamId(steam.getSteamId());
+    }
 
-    //     User fromDb = userRepo.findByUuid(result.getUuid()).orElseThrow();
-    //     assertThat(fromDb.getUsername()).isEqualTo("john2");
+    @Test
+    void shouldFindByUuidWhenExists(){
+        UUID uuid = UUID.randomUUID();
 
-    //     SecurityContextHolder.clearContext();
-    // }
+        User user = new User();
+        user.setUuid(uuid);
+
+        when(userRepo.findByUuid(uuid)).thenReturn(Optional.of(user));
+
+        UserDTO result = userService.findByUuid(uuid);
+
+        assertEquals(userService.toDTO(user), result);
+        verify(userRepo).findByUuid(uuid);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotExists(){
+        UUID uuid = UUID.randomUUID();
+
+        when(userRepo.findByUuid(uuid)).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class, 
+                () -> userService.findByUuid(uuid));
+
+        assertTrue(ex.getMessage().contains(uuid.toString()));
+        verify(userRepo).findByUuid(uuid);
+    }
+
+    @Test
+    void shouldCreateUser_withPassword() {
+        UserRequest req = UserRequest.builder()
+                        .email("test@mail.com")
+                        .username("ivan")
+                        .password("12345")
+                        .build();
+
+        when(userRepo.existsByEmail(req.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("12345")).thenReturn("encoded");
+        when(userRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        User result = userService.create(req);
+
+        assertEquals("encoded", result.getPassword());
+
+        verify(passwordEncoder).encode("12345");
+    }
+
+    @Test
+    void shouldThrowException_whenEmailExists() {
+        UserRequest req = UserRequest.builder().email("test@mail.com").build();
+
+        when(userRepo.existsByEmail(req.getEmail())).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.create(req));
+
+        verify(userRepo).existsByEmail(req.getEmail());
+        verify(userRepo, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowException_whenSteamIdExists() {
+        UserRequest req = UserRequest.builder().email("test@mail.com").steamId("123").build();
+
+        when(userRepo.existsBySteamId(req.getSteamId())).thenReturn(true);
+
+        assertThrows(RuntimeException.class,
+                () -> userService.create(req));
+
+        verify(userRepo).existsBySteamId(req.getSteamId());
+        verify(userRepo, never()).save(any());
+    }
+
+    
+
 }

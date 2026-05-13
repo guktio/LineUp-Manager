@@ -31,7 +31,8 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private Logger logger = LoggerFactory.getLogger(AuthController.class); 
+    private Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
     private static String api = "/api/auth";
 
     @Operation(summary = "Registration for user")
@@ -46,6 +47,7 @@ public class AuthController {
 
     @Operation(summary = "Login for user")
     @PostMapping("/login")
+
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         logger.info("POST {}/login",api);
         return ResponseEntity.ok(authService.login(authRequest));

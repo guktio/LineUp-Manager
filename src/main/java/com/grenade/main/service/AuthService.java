@@ -37,12 +37,12 @@ public class AuthService {
     public AuthResponse register(AuthRequest authRequest) {
         UserRequest.UserRequestBuilder user = UserRequest
                             .builder()
-                            .username(authRequest.getUsername())
                             .email(authRequest.getEmail())
                             .password(authRequest.getPassword());
-        if(authRequest.getPassword() != null && authRequest.getPassword().equals(null)){
+        if(authRequest.getPassword() != null){
             user.password(passwordEncoder.encode(authRequest.getPassword()));
         }
+        
         User created = userService.create(user.build());
 
         String token = jwtProvider.generateToken(created.getUuid());
@@ -64,9 +64,9 @@ public class AuthService {
 
             String token = jwtProvider.generateToken(userUuid);
             
-            logger.info("User {} logged in.",auth.getName());
+            logger.info("User {} logged in.", userUuid);
             return new AuthResponse(userService.findByUuid(UUID.fromString(jwtProvider.getUuidFromToken(token))), token);
-
+            
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username or password");
         } catch (UsernameNotFoundException e) {

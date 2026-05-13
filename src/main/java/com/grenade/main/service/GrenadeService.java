@@ -1,6 +1,5 @@
 package com.grenade.main.service;
 
-import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -33,17 +32,19 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     private final GrenadeRepo grenadeRepo;
     private final UserRepo userRepo;
     private final MediaRepo mediaRepo;
-    private final VideoThumbnailExtractor videoThumbnailExtractor;
     private final StarsRepo starsRepo;
+
+    private final MediaService mediaService;
+
     private static final Logger logger = LoggerFactory.getLogger(GrenadeService.class);
 
-    public GrenadeService(GrenadeRepo grenadeRepo, UserRepo userRepo, MediaRepo mediaRepo, VideoThumbnailExtractor videoThumbnailExtractor, StarsRepo starsRepo) {
+    public GrenadeService(GrenadeRepo grenadeRepo, UserRepo userRepo, MediaRepo mediaRepo, StarsRepo starsRepo, MediaService mediaService) {
         super(grenadeRepo);
         this.grenadeRepo = grenadeRepo;
         this.userRepo = userRepo;
         this.mediaRepo = mediaRepo;
         this.starsRepo = starsRepo;
-        this.videoThumbnailExtractor = videoThumbnailExtractor;
+        this.mediaService = mediaService;
     }
 
     public String generateName(){
@@ -57,9 +58,14 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     }
     
     public GrenadeResponse create(GrenadeRequest grenade){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    
+        if (auth == null || !auth.isAuthenticated() || auth.getName() == null) {
+            throw new EntityNotFoundException("User are not logged in");
+        }
+        String username = auth.getName();
         User user = userRepo.findByUsername(username).orElseThrow(() -> 
-            new EntityNotFoundException("User with username not found: "+ username));
+        new EntityNotFoundException("User with username not found: "+ username));
         String name = grenade.name;
         if(grenade.name == null || grenade.name.isBlank()){
             name = generateName();
@@ -77,8 +83,7 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         if (grenade.media != null && !grenade.media.isBlank()) {
             Media media = mediaRepo.findByUuid(UUID.fromString(grenade.media)).orElseThrow(() -> 
                 new EntityNotFoundException("Media with uuid not found: "+ UUID.fromString(grenade.media)));
-            String thumbnail = videoThumbnailExtractor.extractThumbnail(media.getPath(), UUID.randomUUID()+".jpg");
-            grnd.media(media.getPath()).thumbnail(thumbnail);
+            grnd.media(media);
         }
         Grenade entity = Objects.requireNonNull(grnd.build(), "Grenade builder returned null");
         grenadeRepo.save(entity);
@@ -93,7 +98,6 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         return toDTO(entity);
     }
 
-    @SuppressWarnings("null")
     public GrenadeResponse update(UUID uuid, GrenadeRequest grnd){
     Authentication user = SecurityContextHolder.getContext().getAuthentication();
     Grenade existing = grenadeRepo.findByUuid(uuid)
@@ -116,13 +120,13 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     if(grnd.speed != null) builder.speed(grnd.speed);
     if(grnd.buttons != null) builder.buttons(grnd.buttons);
     if(grnd.description != null) builder.description(grnd.description);
+
     if(grnd.media != null && !grnd.media.isBlank()){
         Media media = mediaRepo.findByUuid(UUID.fromString(grnd.media))
             .orElseThrow(() -> new EntityNotFoundException("Media not found: " + grnd.media));
-        String thumbnail = videoThumbnailExtractor.extractThumbnail(
-            media.getPath(), UUID.randomUUID()+".jpg");
-        builder.media(media.getPath()).thumbnail(thumbnail);
+        builder.media(media);
     }
+
     UUID userUuid = userRepo.findByUsername(user.getName()).orElseThrow(() -> 
             new EntityNotFoundException("User was not exists with username " + user.getName())).getUuid();
     Grenade updated = builder.ready(true).build();
@@ -213,8 +217,8 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
                                 .stars(grnd.getStars())
                                 .likedByMe(isStaredByUser(grnd.getUuid()))
                                 .createdAt(grnd.getCreatedAt());
-        if (grnd.getMedia() != null && !grnd.getMedia().isBlank()) {
-            dto.media(new File(grnd.getMedia()).getName()).thumbnail(grnd.getThumbnail());
+        if (grnd.getMedia() != null) {
+            dto.media(mediaService.toDTO(grnd.getMedia()));
         }
         return dto.build();
     }

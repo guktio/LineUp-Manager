@@ -22,11 +22,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepo userRepo;
 
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
-
-
+    
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.warn("Dont need to be called;");
         logger.debug("User loaded with username: {}",username );
         return userRepo.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));

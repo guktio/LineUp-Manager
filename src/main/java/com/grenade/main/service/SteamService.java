@@ -29,12 +29,12 @@ import lombok.RequiredArgsConstructor;
 public class SteamService {
     
     private final SteamApiClient steamApi;
+    
+    private final UserRepo userRepo; 
 
     private final HttpClient client = HttpClient.newBuilder().build();
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private final UserRepo userRepo;
 
     public String validateSteamOpenIdResponse(Map<String, String> openIdParams) {
         String loginUrl = "https://steamcommunity.com/openid/login";

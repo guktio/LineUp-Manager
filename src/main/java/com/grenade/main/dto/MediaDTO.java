@@ -8,5 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class MediaDTO{
-    private UUID UUID;
+     UUID UUID;
+    String videoPath;
+    String thumbnailPath;
 }

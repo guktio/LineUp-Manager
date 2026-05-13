@@ -18,7 +18,7 @@ import com.grenade.main.entity.User;
 public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
     @Query(""" 
         SELECT g FROM Grenade g 
-        WHERE (:map IS NULL OR g.map = :map) 
+        WHERE (:map IS NULL OR g.map = :map)
         AND (:grenadeType IS NULL OR g.grenadeType = :grenadeType)
         AND (:author IS NULL OR g.author.id = :author)
         AND (
@@ -28,8 +28,7 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
         )
         AND (:likedByUserId IS NULL OR EXISTS(
             SELECT 1 FROM Stars s
-            WHERE s.grenade = g
-            AND s.user.id = :likedByUserId
+            WHERE s.grenade = g AND s.user.id = :likedByUserId
         ))
         AND  g.approved = true
         AND  g.ready = true

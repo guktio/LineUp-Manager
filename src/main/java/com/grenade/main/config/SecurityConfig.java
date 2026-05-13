@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -38,7 +39,6 @@ public class SecurityConfig {
     private final AuthEntryPoint authEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -65,8 +65,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/**").permitAll()
                 .requestMatchers("/h2/**").permitAll()
-                .requestMatchers(HttpMethod.GET,"/api/grenades").permitAll()
-                .requestMatchers(HttpMethod.GET,"/api/users").permitAll()
+                .requestMatchers(HttpMethod.GET,"/api/grenades/**").permitAll()
+                .requestMatchers(HttpMethod.GET,"/api/users/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/game/**").hasRole("GAME_SERVER")
                 .anyRequest().authenticated())
@@ -79,18 +79,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
     
-    @SuppressWarnings("null")
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings( CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/api/**")
                         .allowedOrigins("http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
@@ -99,7 +97,7 @@ public class SecurityConfig {
             }
 
             @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/files/**")
                         .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
                 

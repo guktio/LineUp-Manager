@@ -19,21 +19,30 @@ public class InitService {
 
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
-        private final static Logger logger = LoggerFactory.getLogger(InitService.class);
-
+    private final static Logger logger = LoggerFactory.getLogger(InitService.class);
 
     @PostConstruct
-    @SuppressWarnings("null")
     public void init() {
-        if(!userRepo.existsBySteamId("76561198848703847")){
+        if(!userRepo.existsBySteamId("76561198848703847") && !userRepo.existsByEmail("admin@gmail.com")){
             User user = User.builder()
                                 .username("admin")
-                                .email("admin")
+                                .email("admin@gmail.com")
                                 .password(passwordEncoder.encode("admin"))
                                 .uuid(UUID.randomUUID())
                                 .role(User.RoleType.ADMIN)
                                 .build();
             logger.debug("Super user created!");
+            userRepo.save(user);
+        }
+        if(!userRepo.existsByEmail("test@gmail.com")){
+            User user = User.builder()
+                                .username("test")
+                                .email("test@gmail.com")
+                                .password(passwordEncoder.encode("test"))
+                                .uuid(UUID.randomUUID())
+                                .role(User.RoleType.USER)
+                                .build();
+            logger.debug("Test user created!");
             userRepo.save(user);
         }
     }

@@ -55,7 +55,7 @@ public class User implements UserDetails{
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String username;
     
     @Column(unique = true)

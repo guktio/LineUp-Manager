@@ -19,7 +19,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -85,9 +87,9 @@ public class Grenade {
     
     private String side;
 
-    private String media;
-
-    private String thumbnail;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "media_id", referencedColumnName = "id")
+    private Media media;
 
     private String command;
 
@@ -109,10 +111,10 @@ public class Grenade {
     private boolean deleted = false;
 
     @Builder.Default
-    private boolean approved = false;
+    private boolean approved = true;
 
     @Builder.Default
-    private boolean ready = false;
+    private boolean ready = true;
 
     @CreationTimestamp
     @Column(updatable = false)

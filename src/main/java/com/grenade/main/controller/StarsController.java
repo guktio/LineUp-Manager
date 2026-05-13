@@ -34,7 +34,7 @@ public class StarsController {
     @Tag(name = "user")
     @PostMapping("/{uuid}")
     private ResponseEntity<?> star(@PathVariable @NonNull UUID uuid){
-        logger.info("POST ",api,uuid);
+        logger.info("POST {}/{}",api,uuid);
         boolean liked = starsService.toggleStar(uuid);
         Map<String, Object> response = new HashMap<>();
         response.put("liked", liked);

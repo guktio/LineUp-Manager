@@ -70,7 +70,6 @@ public class SteamApiClient {
         }
     }
 
-    //TODO: add parsing to dto
     public String getSteamNewsForApp(Long appid, Long count){
             String url = String.format(
             "%s/ISteamNews/GetNewsForApp/v2/?appid=%s&count=%s",

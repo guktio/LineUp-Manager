@@ -2,7 +2,6 @@ package com.grenade.main.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -11,7 +10,6 @@ import java.util.UUID;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
-@ActiveProfiles("test")
 class JwtTest {
 
     private JwtProvider jwtProvider;

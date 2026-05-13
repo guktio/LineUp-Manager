@@ -36,7 +36,9 @@ public class Media {
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    private String path;
+    private String video;
+
+    private String thumbnail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

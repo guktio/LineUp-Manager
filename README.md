@@ -1,23 +1,5 @@
 # CS2 Lineup REST API
-
-### Built with: Spring Boot, Lombok, JPA/Hibernate, JWT, Spring Security
-### Testing: Spring Boot Test, JUnit Jupiter, K6
-
-## Overview
-
 The CS2 Lineup REST API allows users to create, share, and explore Counter-Strike 2 lineups. It provides an easy way for players to save and showcase their strategies, videos, and related content.
-## Features
-  User Authentication
-  Login with your Steam account
-  Register and login without Steam
-  Lineups Management
-  Upload video and add text information for your lineup
-  Automatic thumbnail generation using FFmpeg
-  Save your favorite lineups with stars
-  Privacy & Approval
-  Users can keep their lineups private
-  Admins can approve lineups for public view
-  Connected to CS2 server to collect info directly from game
 
   ## Main workflow for application:
   1. User register/User log in/User log in via steam
@@ -27,51 +9,94 @@ The CS2 Lineup REST API allows users to create, share, and explore Counter-Strik
   5. Admin approve lineup and now it visible for all
   6. Anothe user can star it and than use it in their game
 
-## Requirments
-Java 21+
-Python 3.12+
-Maven 3.9+
-Docker 
-FFmpeg 
-Steam API key
->**Notice:** To find Steam API key visit https://steamcommunity.com/dev/apikey 
+## Tech Stack  
 
-## Running the Project Locally
+**Server:** Spring Boot, Lombok, JPA/Hibernate, JWT, Spring Security
 
-1. **Clone the repository:**
+**Testing:** Spring Boot Test, JUnit Jupiter, K6, Mockito
+## Environment Variables  
+To run this project, you will need to add the following environment variables to your .env file  
+`STEAM_API_KEY` 
 
-```bash
-git clone https://github.com/guktio/LineUp-Manager.git
-cd LineUp-Manager
-```
-2. **Build the project:**
- ```bash
+>**Notice:** To find your Steam API key visit https://steamcommunity.com/dev/apikey 
+## Run Locally  
+Clone the project  
+~~~bash  
+  git clone https://github.com/guktio/LineUp-Manager.git
+~~~
+
+Go to the project directory  
+~~~bash  
+  cd LineUp-Manager
+~~~
+
+Build
+~~~bash  
   mvn clean package
-```
-3. **Run the project:**
-```bash
-  mvn spring-boot:run -Pprod -Dspring-boot.run.arguments="--STEAM_API_KEY=YOUR_STEAM_KEY"
-```
-  **Access the API documentation:**
-  http://localhost:8080/swagger-ui/index.html
-  
-## Build a docker image
-1. **Clone the repository:**
- >**Notice:** Before using the script, make sure to set up all variables according to your environment.
+~~~
 
-```bash
-git clone https://github.com/guktio/LineUp-Manager.git
-cd LineUp-Manager
-```
-2. **Build the project:**
-```bash
-python build_and_deploy.py --name=IMAGE_NAME --tag=IMAGE_TAG --user=REMOTE_USER --host=REMOTE_HOST
-```
-3. **Load docker image on your server**
-```bash
-docker load -i lineup.tar
-```
-4. **Run docker image**
-```bash
-docker run -d -p 8080:8080 -v /data/lineup/media:/app/uploads -e STEAM_API_KEY=YOUR_STEAM_API_KEY --name lineup lineup:latest
-```
+Start  
+~~~bash  
+  mvn spring-boot:run -Pprod -Dspring-boot.run.arguments="--STEAM_API_KEY=YOUR_STEAM_KEY"
+~~~ 
+
+  
+## Features  
+- User Authentication
+- Login with your Steam account
+- Register and login without Steam
+- Lineups Management
+- Upload video and add text information for your lineup
+- Automatic thumbnail generation using FFmpeg
+- Save your favorite lineups with stars
+- Privacy & Approval
+- Users can keep their lineups private
+- Admins can approve lineups for public view
+- Connected to CS2 server to collect info directly from game
+## API Reference
+
+#### Get all lineups  
+
+```http
+  GET /api/grenades
+```  
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `p` | `int` | Page number |
+| `s` | `int` | Ammount of elements on page |
+| `map` | `Grenade.MapType` | Map name |
+| `grenade` | `Grenade.GrenadeType` | Grenade name(in game files name) |
+| `sortdirection` | `string` | DESC or ASC |
+| `userUuid` | `UUID` | Author uuid |
+| `name` | `string` | line up name (example: "fast window","default stair" etc.) |
+| `likedByUserId` | `UUID` | Liked by user(uuid) |
+
+#### Save lineup video
+
+~~~http
+  POST /api/grenades/video
+~~~
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `file`  | `bin` | **Required**. Video |
+
+~~~http
+  POST /api/grenades
+~~~
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `name`  | `String` | Name of lineup |
+| `command`  | `String` | **Required**. in game command (setpos;setang) |
+| `map`  | `Grenade.MapType` | **Required**. map name |
+| `grenadeType`  | `Grenade.GrenadeType` | **Required**. grenade name(in game files name) |
+| `side`  | `String` | T,CT,Both |
+| `speed`  | `String` | Speed when throwing |
+| `buttons`  | `List<String>` | Buttons that were pressed |
+| `media`  | `String` | **Required**. uuid of video |
+| `description`  | `String` | more info about lineup |
+
+  **To see more:**
+  http://localhost:8080/swagger-ui/index.html

@@ -39,6 +39,12 @@
         <spring.profiles.active>prod</spring.profiles.active>
       </properties>
     </profile>
+	<profile>
+      <id>h2</id>
+      <properties>
+        <spring.profiles.active>h2</spring.profiles.active>
+      </properties>
+    </profile>
   </profiles>
 	<properties>
 		<java.version>21</java.version>
@@ -110,7 +116,7 @@
 		<dependency>
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacv-platform</artifactId>
-			<version>1.5.10</version>
+			<version>1.5.9</version>
 		</dependency>
 	</dependencies>
 	<build>

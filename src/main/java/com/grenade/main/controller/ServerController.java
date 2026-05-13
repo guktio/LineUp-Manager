@@ -58,7 +58,7 @@ public class ServerController {
     @PostMapping("/user/steamId")
     public ResponseEntity<Boolean> isSteamID(@RequestBody String steamId){
         logger.info(steamId);
-        return new ResponseEntity<>(userService.isUserExist(steamId), HttpStatus.OK);
+        return new ResponseEntity<>(userService.isUserExistBySteamId(steamId), HttpStatus.OK);
     }
 
     // @Tag(name = "server")
