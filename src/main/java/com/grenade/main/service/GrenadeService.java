@@ -1,7 +1,6 @@
 package com.grenade.main.service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -33,8 +32,10 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
     private final UserRepo userRepo;
     private final MediaRepo mediaRepo;
     private final StarsRepo starsRepo;
-
+    
     private final MediaService mediaService;
+
+    private final Random random;
 
     private static final Logger logger = LoggerFactory.getLogger(GrenadeService.class);
 
@@ -45,34 +46,23 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         this.mediaRepo = mediaRepo;
         this.starsRepo = starsRepo;
         this.mediaService = mediaService;
+        this.random = new Random();
     }
 
-    public String generateName(){
+    public String generateName(Random random){
         List<String> words1 = List.of("iron", "shadow", "frost", "storm", "dark", "blood", "silver", "golden");
         List<String> words2 = List.of("blade", "edge", "fang", "claw", "strike", "born", "forge", "bane");
-
-        Random random = new Random();
-
         String name = words1.get(random.nextInt(words1.size()))+"_"+words2.get(random.nextInt(words2.size()));
         return name;
     }
     
-    public GrenadeResponse create(GrenadeRequest grenade){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    
-        if (auth == null || !auth.isAuthenticated() || auth.getName() == null) {
-            throw new EntityNotFoundException("User are not logged in");
-        }
-        String username = auth.getName();
-        User user = userRepo.findByUsername(username).orElseThrow(() -> 
-        new EntityNotFoundException("User with username not found: "+ username));
-        String name = grenade.name;
+    public GrenadeResponse create(GrenadeRequest grenade, User user){
         if(grenade.name == null || grenade.name.isBlank()){
-            name = generateName();
+            grenade.name = generateName(random);
         } 
         Grenade.GrenadeBuilder grnd = Grenade.builder()
                             .author(user)
-                            .name(name)
+                            .name(grenade.name)
                             .map(grenade.map)
                             .grenadeType(grenade.grenadeType)
                             .side(grenade.side)
@@ -80,12 +70,12 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
                             .command(grenade.command)
                             .buttons(grenade.buttons)
                             .description(grenade.description);
-        if (grenade.media != null && !grenade.media.isBlank()) {
-            Media media = mediaRepo.findByUuid(UUID.fromString(grenade.media)).orElseThrow(() -> 
-                new EntityNotFoundException("Media with uuid not found: "+ UUID.fromString(grenade.media)));
+        if (grenade.media != null) {
+            Media media = mediaRepo.findByUuid(grenade.media).orElseThrow(() -> 
+                new EntityNotFoundException("Media with uuid not found: "+ grenade.media));
             grnd.media(media);
         }
-        Grenade entity = Objects.requireNonNull(grnd.build(), "Grenade builder returned null");
+        Grenade entity = grnd.build();
         grenadeRepo.save(entity);
         logger.debug("Created grenade: {}, by user: {}", entity.getUuid(), entity.getAuthor().getUuid());
         return toDTO(entity);
@@ -98,54 +88,52 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         return toDTO(entity);
     }
 
-    public GrenadeResponse update(UUID uuid, GrenadeRequest grnd){
-    Authentication user = SecurityContextHolder.getContext().getAuthentication();
-    Grenade existing = grenadeRepo.findByUuid(uuid)
-        .orElseThrow(() -> new EntityNotFoundException("Entity not found: " + uuid));
-    boolean isOwner = existing.getAuthor().getUsername().equals(user.getName());
-    boolean isAdmin = user.getAuthorities().stream()
-        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-    
-    if (!isOwner && !isAdmin){
-        throw new AccessDeniedException("You can only update your own grenades");
-    }
-    
-    Grenade.GrenadeBuilder builder = existing.toBuilder();
-    
-    if(grnd.name != null) builder.name(grnd.name);
-    if(grnd.command != null) builder.command(grnd.command);
-    if(grnd.map != null) builder.map(grnd.map);
-    if(grnd.grenadeType != null) builder.grenadeType(grnd.grenadeType);
-    if(grnd.side != null) builder.side(grnd.side);
-    if(grnd.speed != null) builder.speed(grnd.speed);
-    if(grnd.buttons != null) builder.buttons(grnd.buttons);
-    if(grnd.description != null) builder.description(grnd.description);
+    public GrenadeResponse update(UUID uuid, GrenadeRequest grnd, User user){
+        Grenade existing = grenadeRepo.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Entity not found: " + uuid));
+        boolean isOwner = existing.getAuthor().getEmail().equals(user.getEmail());
+        boolean isAdmin = user.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isOwner && !isAdmin){
+            throw new AccessDeniedException("You can only update your own grenades");
+        }
+        
+        Grenade.GrenadeBuilder builder = existing.toBuilder();
+        
+        if(grnd.name != null) builder.name(grnd.name);
+        if(grnd.command != null) builder.command(grnd.command);
+        if(grnd.map != null) builder.map(grnd.map);
+        if(grnd.grenadeType != null) builder.grenadeType(grnd.grenadeType);
+        if(grnd.side != null) builder.side(grnd.side);
+        if(grnd.speed != null) builder.speed(grnd.speed);
+        if(grnd.buttons != null) builder.buttons(grnd.buttons);
+        if(grnd.description != null) builder.description(grnd.description);
 
-    if(grnd.media != null && !grnd.media.isBlank()){
-        Media media = mediaRepo.findByUuid(UUID.fromString(grnd.media))
-            .orElseThrow(() -> new EntityNotFoundException("Media not found: " + grnd.media));
-        builder.media(media);
-    }
+        if(grnd.media != null){
+            Media media = mediaRepo.findByUuid(grnd.media)
+                .orElseThrow(() -> new EntityNotFoundException("Media not found: " + grnd.media));
+            builder.media(media);
+        }
 
-    UUID userUuid = userRepo.findByUsername(user.getName()).orElseThrow(() -> 
-            new EntityNotFoundException("User was not exists with username " + user.getName())).getUuid();
-    Grenade updated = builder.ready(true).build();
-    grenadeRepo.save(updated);
-    logger.debug("Updated grenade: {}, by user: {}", uuid, userUuid);
-    return toDTO(updated);
-}
+        Grenade updated =  grenadeRepo.save(builder.ready(true).build());
+        logger.debug("Updated grenade: {}, by user: {}", uuid, user.getUuid());
+        return toDTO(updated);
+    }
 
     public PageDTO<GrenadeResponse> getByFilter(Pageable pageable, Grenade.MapType map,
                                     Grenade.GrenadeType grenade,
                                     UUID authorUuid, String name, UUID likedByUserId) {
         Long userId = null;
         if (likedByUserId != null){
-            userId = userRepo.findByUuid(likedByUserId).orElseThrow(() -> new EntityNotFoundException("Liked by user was not found with uuid:" + likedByUserId)).getId();
+            userId = userRepo.findByUuid(likedByUserId).orElseThrow(() -> 
+                new EntityNotFoundException("Liked by user was not found with uuid: " + likedByUserId)).getId();
         }
 
         Long user = null;
         if (authorUuid != null) {
-            user = userRepo.findByUuid(authorUuid).orElseThrow(() -> new EntityNotFoundException("Entity not found with uuid:"+authorUuid)).getId();
+            user = userRepo.findByUuid(authorUuid).orElseThrow(() -> 
+                new EntityNotFoundException("Entity not found with uuid: " + authorUuid)).getId();
         }
 
         Page<Grenade> page = grenadeRepo.findByFilter(pageable, map, grenade, user, name, userId);
@@ -154,11 +142,15 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         return pageDTO;
     }
 
-    public PageDTO<GrenadeResponse> getUreadyGrenade(Pageable pageable){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long userId = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("Entity not found with username:" + username)).getId();
+    public PageDTO<GrenadeResponse> getUreadyGrenade(Pageable pageable, User user){
+        Long userId = userRepo.findByEmail(user.getEmail()).orElseThrow(() ->
+             new EntityNotFoundException("Entity not found with username:" + user.getEmail()))
+        .getId();
         Page<Grenade> page = grenadeRepo.findUnreadyByAuthor(pageable, userId);
-        PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1, page.getTotalPages());
+        PageDTO<GrenadeResponse> pageDTO = new PageDTO<GrenadeResponse>(
+            page.getContent().stream().map(this::toDTO).toList(), 
+            page.getNumber() + 1, 
+            page.getTotalPages());
         logger.debug("Unready retured: {}",pageDTO.toString());
         return pageDTO;
     }
@@ -173,29 +165,16 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
         logger.debug("Approve: {}",uuid);
     }
 
-    public PageDTO<GrenadeResponse> getApproved(Pageable pageable, boolean isApproved){
-        Page<Grenade> page = grenadeRepo.findApproved(pageable, isApproved);
+    public PageDTO<GrenadeResponse> getUnapproved(Pageable pageable){
+        Page<Grenade> page = grenadeRepo.findUnapproved(pageable);
         PageDTO<GrenadeResponse> pageDTO= new PageDTO<GrenadeResponse>(page.getContent().stream().map(this::toDTO).toList(), page.getNumber() + 1, page.getTotalPages());
-        logger.debug("Return approved : {}",pageDTO);
+        logger.debug("Return approved: {}",pageDTO);
         return pageDTO;
     }
 
-    public List<GrenadeResponse> getByUser(String author) {
-        User usr = userRepo.findByUsername(author).orElseThrow(() -> new EntityNotFoundException("User does not found: "+ author));
-        return grenadeRepo.findByAuthor(usr)
-                .stream()
-                .map(this::toDTO)
-                .toList();
-    }
-
-    public boolean isStaredByUser(UUID grUuid){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(username.equals("anonymousUser")) {
-            return false;
-        }
+    public boolean isStaredByUser(UUID grUuid, User user){
         Grenade gr = grenadeRepo.findByUuid(grUuid)
                 .orElseThrow(() -> new EntityNotFoundException("Entity with uuid "+grUuid+" was not found"));
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User with name "+username+" was not found2"));
         return starsRepo.existsByUserIdAndGrenadeId(user.getId(), gr.getId());
     }
 
@@ -215,7 +194,6 @@ public class GrenadeService extends ServiceBase<Grenade, GrenadeResponse, UUID, 
                                 .authorName(grnd.getAuthor().getUsername())
                                 .approved(grnd.isApproved())
                                 .stars(grnd.getStars())
-                                .likedByMe(isStaredByUser(grnd.getUuid()))
                                 .createdAt(grnd.getCreatedAt());
         if (grnd.getMedia() != null) {
             dto.media(mediaService.toDTO(grnd.getMedia()));

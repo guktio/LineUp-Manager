@@ -31,9 +31,6 @@ public class JwtFilter extends OncePerRequestFilter{
     private final UserDetailsServiceImpl userDetailsService;
     private final Logger logger = LoggerFactory.getLogger(getClass()); 
 
-    /*
-    Filter before spring security default filter
-    */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, 
                                     @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
@@ -54,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter{
 
         UUID userUuid = UUID.fromString(jwtProvider.getUuidFromToken(token));
         User userDetails = userDetailsService.loadUserByUuid(userUuid);
-
+        //TODO:add custom pricipal for safety
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

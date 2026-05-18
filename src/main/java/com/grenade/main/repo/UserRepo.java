@@ -11,7 +11,7 @@ import com.grenade.main.entity.User;
 
 @Repository
 public interface UserRepo extends RepoBase<User, UUID> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
     boolean existsByUuid(UUID uuid);
     boolean existsByEmail(String email);
     @Query("SELECT u FROM User u JOIN u.steamProfile sp WHERE sp.steamId = :steamId")

@@ -9,13 +9,12 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.grenade.main.dto.MediaDTO;
 import com.grenade.main.entity.Media;
+import com.grenade.main.entity.User;
 import com.grenade.main.repo.MediaRepo;
-import com.grenade.main.repo.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.bytedeco.javacv.*;
@@ -26,7 +25,6 @@ import org.bytedeco.ffmpeg.global.avutil;
 public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
     
     private final MediaRepo mediaRepo;
-    private final UserRepo userRepo;
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
@@ -38,10 +36,9 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
     }
 
 
-    protected MediaService(MediaRepo mediaRepo, UserRepo userRepo) {
+    protected MediaService(MediaRepo mediaRepo) {
         super(mediaRepo);
         this.mediaRepo = mediaRepo;
-        this.userRepo = userRepo;
     } 
 
     public String getFileExtention(String filename){
@@ -56,7 +53,7 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
         return ext.toLowerCase();
     }
 
-    public MediaDTO create(MultipartFile file){
+    public MediaDTO create(MultipartFile file, User user){
     
         String uploadDirPath = System.getProperty("user.dir") + uploadPath + "/video";
         
@@ -64,8 +61,6 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
             throw new IllegalArgumentException("File is empty");
         }
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        
         try{
             File uploadDir = new File(uploadDirPath); 
             if (!uploadDir.exists() && !uploadDir.mkdirs()) {
@@ -88,8 +83,7 @@ public class MediaService extends ServiceBase<Media, MediaDTO, UUID, MediaRepo>{
                         .video(uniqueFileName)
                         .thumbnail(extractThumbnail(filePath.getPath(), uuid+".jpg"))
                         .uuid(uuid)
-                        .user(userRepo.findByUsername(username).orElseThrow(
-                                            () -> new EntityNotFoundException("User not found:" + username)))
+                        .user(user)
                         .build();
             
             try {

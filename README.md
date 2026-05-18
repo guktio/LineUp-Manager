@@ -100,3 +100,5 @@ Start
 
   **To see more:**
   http://localhost:8080/swagger-ui/index.html
+
+  [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/44209970-39ffc588-727a-4717-9273-10b8cbaf49d4?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D44209970-39ffc588-727a-4717-9273-10b8cbaf49d4%26entityType%3Dcollection%26workspaceId%3D849b5e54-06f0-4afc-a55f-8808fe913a53)

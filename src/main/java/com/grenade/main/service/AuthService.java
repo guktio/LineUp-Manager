@@ -54,21 +54,23 @@ public class AuthService {
     public AuthResponse login(AuthRequest authRequest) {
         try{
             UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword());
 
             Authentication auth = authenticationManager.authenticate(authToken);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            UUID userUuid = ((User) auth.getPrincipal()).getUuid(); 
+            User user = (User) auth.getPrincipal(); 
 
-            String token = jwtProvider.generateToken(userUuid);
+            String token = jwtProvider.generateToken(user.getUuid());
             
-            logger.info("User {} logged in.", userUuid);
+            logger.info("User {} logged in.", user.getUuid());
+            logger.info("Raw password from request: {}", authRequest.getPassword());
+            logger.info("Encoded password from DB: {}", user.getPassword());
             return new AuthResponse(userService.findByUuid(UUID.fromString(jwtProvider.getUuidFromToken(token))), token);
             
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Invalid username or password");
+            throw e;
         } catch (UsernameNotFoundException e) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -88,7 +90,7 @@ public class AuthService {
     
         String token = jwtProvider.generateToken(user.getUuid());
     
-        logger.info("User {} logged in via Steam.", user.getUsername());
+        logger.info("User {} logged in via Steam.", user.getEmail());
             
         return new AuthResponse(userService.toDTO(user), token);
     }

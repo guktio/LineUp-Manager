@@ -19,9 +19,8 @@ public class AuditorAwareImpl implements AuditorAware<User> {
     private final UserRepo userRepo;
     
     @Override
-    @SuppressWarnings("null")
     public Optional<User> getCurrentAuditor() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepo.findByUsername(username);
+        User username = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepo.findByEmail(username.getEmail());
     }
 }

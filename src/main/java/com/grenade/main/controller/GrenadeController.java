@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +30,7 @@ import com.grenade.main.dto.MediaDTO;
 import com.grenade.main.dto.PageDTO;
 import com.grenade.main.dto.ReadyDTO;
 import com.grenade.main.entity.Grenade;
+import com.grenade.main.entity.User;
 import com.grenade.main.service.GrenadeService;
 import com.grenade.main.service.MediaService;
 
@@ -42,27 +44,31 @@ import lombok.RequiredArgsConstructor;
 @SecurityRequirement(name = "token")
 @RequiredArgsConstructor
 public class GrenadeController {
+        
+    private final GrenadeService grenadeService;
+    
+    private final MediaService mediaService;
 
     private static String api = "/api/grenades";
 
-    private final GrenadeService grenadeService;
-    private final MediaService mediaService;
     private Logger logger = LoggerFactory.getLogger(GrenadeController.class);
 
     @Tag(name = "user")
     @Operation(summary = "Create grenade")
     @PostMapping()
-    public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade) {
+    public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade, Authentication authentication) {
         logger.info("POST {}" ,api);
-        return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.CREATED);
+        User user = (User) authentication.getPrincipal();
+        return new ResponseEntity<>(grenadeService.create(grenade, user), HttpStatus.CREATED);
     }
 
     @Tag(name = "user")
     @Operation(summary = "Update grenade")
     @PutMapping("/{id}")
-    public ResponseEntity<GrenadeResponse> update(@PathVariable UUID id, @RequestBody GrenadeRequest grenade) {
+    public ResponseEntity<GrenadeResponse> update(@PathVariable UUID id, @RequestBody GrenadeRequest grenade, Authentication authentication) {
         logger.info("PUT {} Grenade info:",api,grenade);
-        return new ResponseEntity<>(grenadeService.update(id, grenade), HttpStatus.OK);
+        User user = (User) authentication.getPrincipal();
+        return new ResponseEntity<>(grenadeService.update(id, grenade, user), HttpStatus.OK);
     }
 
     @Tag(name = "user")
@@ -70,9 +76,10 @@ public class GrenadeController {
     @PostMapping(value = "/video",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MediaDTO> saveVideo(MultipartFile file){
+    public ResponseEntity<MediaDTO> saveVideo(MultipartFile file, Authentication authentication){
         logger.info("POST {}/video format={}, name={}", api, file.getContentType(), file.getOriginalFilename());
-        return new ResponseEntity<>(mediaService.create(file), HttpStatus.CREATED);
+        User user = (User) authentication.getPrincipal();
+        return new ResponseEntity<>(mediaService.create(file, user), HttpStatus.CREATED);
     }
 
     @Tag(name = "public")
@@ -107,9 +114,11 @@ public class GrenadeController {
     @Operation(summary = "Get user unredy Grenades")
     @GetMapping("/unready")
     public ResponseEntity<PageDTO<GrenadeResponse>> getUnready(@RequestParam(defaultValue = "1") int p,
-                                                                @RequestParam(defaultValue = "5") int s){
+                                                                @RequestParam(defaultValue = "5") int s,
+                                                                Authentication authentication){
         logger.info("GET {}/unready",api);
-        return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s)), HttpStatus.OK);
+        User user = (User) authentication.getPrincipal();
+        return new ResponseEntity<>(grenadeService.getUreadyGrenade(PageRequest.of(p-1, s), user), HttpStatus.OK);
     }
 
     @Tag(name = "user")
@@ -135,10 +144,9 @@ public class GrenadeController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unapproved")
     public ResponseEntity<PageDTO<GrenadeResponse>> getNotApprovedGrenades(@RequestParam(defaultValue = "1") int p,
-                                                                            @RequestParam(defaultValue = "5") int s,
-                                                                            @RequestParam(defaultValue = "false") boolean isApproved) {
-        logger.info("GET {}/admin Params: p={}, s={}, isApproved={}",api, p, s, isApproved);
-        return new ResponseEntity<>(grenadeService.getApproved(PageRequest.of(p,s), isApproved) ,HttpStatus.OK);
+                                                                            @RequestParam(defaultValue = "5") int s) {
+        logger.info("GET {}/admin Params: p={}, s={}, isApproved={}",api, p, s);
+        return new ResponseEntity<>(grenadeService.getUnapproved(PageRequest.of(p,s)) ,HttpStatus.OK);
     }
 
     @Tag(name = "admin")

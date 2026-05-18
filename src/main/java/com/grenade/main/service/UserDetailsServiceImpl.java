@@ -24,9 +24,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
     
     @Override
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.debug("User loaded with username: {}",username );
-        return userRepo.findByUsername(username)
+    public User loadUserByUsername(String email) throws UsernameNotFoundException {
+        logger.debug("User loaded with email: {}", email);
+        return userRepo.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

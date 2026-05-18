@@ -29,30 +29,32 @@ public class UserDetailsServiceImplTest {
 
     final String username = "testUser";
     final UUID uuid = UUID.randomUUID();
+    final String email = "testUser@mail.com";
     User user;
 
     @BeforeEach
     void setUp() {
         user = new User();
         user.setUsername(username);
+        user.setEmail(email);
         user.setUuid(uuid);
     }
 
     @Test
     void loadUserByUsername_found_returnsUser() {
-        when(userRepo.findByUsername(username)).thenReturn(Optional.of(user));
+        when(userRepo.findByEmail(email)).thenReturn(Optional.of(user));
 
-        User result = service.loadUserByUsername(username);
+        User result = service.loadUserByUsername(email);
 
         assertEquals(username, result.getUsername());
     }
 
     @Test
     void loadUserByUsername_notFound_throwsUsernameNotFoundException() {
-        when(userRepo.findByUsername(username)).thenReturn(Optional.empty());
+        when(userRepo.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
-                () -> service.loadUserByUsername(username));
+                () -> service.loadUserByUsername(email));
     }
 
     @Test

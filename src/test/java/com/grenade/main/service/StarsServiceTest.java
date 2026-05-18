@@ -48,7 +48,7 @@ class StarsServiceTest {
 
         user = new User();
         user.setUuid(UUID.randomUUID());
-        user.setUsername("testUser");
+        user.setEmail("testUser@mail.com");
 
         grenade = new Grenade();
         grenade.setUuid(grenadeUuid);
@@ -58,7 +58,7 @@ class StarsServiceTest {
         ctx.setAuthentication(auth);
         SecurityContextHolder.setContext(ctx);
 
-        when(userRepo.findByUsername("testUser")).thenReturn(Optional.of(user));
+        when(userRepo.findByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(grenadeRepo.findByUuid(grenadeUuid)).thenReturn(Optional.of(grenade));
     }
 
@@ -72,7 +72,7 @@ class StarsServiceTest {
         when(starsRepo.findByUserUuidAndGrenadeUuid(user.getUuid(), grenadeUuid))
                 .thenReturn(Optional.empty());
 
-        boolean result = service.toggleStar(grenadeUuid);
+        boolean result = service.toggleStar(grenadeUuid, user.getUuid());
 
         assertTrue(result);
         verify(starsRepo).save(any(Stars.class));
@@ -84,11 +84,10 @@ class StarsServiceTest {
     @Test
     void toggleStar_starExists_removesStarAndReturnsFalse() {
         Stars existingStar = new Stars();
-        // стар уже есть — возвращаем его
         when(starsRepo.findByUserUuidAndGrenadeUuid(user.getUuid(), grenadeUuid))
                 .thenReturn(Optional.of(existingStar));
 
-        boolean result = service.toggleStar(grenadeUuid);
+        boolean result = service.toggleStar(grenadeUuid, user.getUuid());
 
         assertFalse(result);
         verify(starsRepo).delete(existingStar);

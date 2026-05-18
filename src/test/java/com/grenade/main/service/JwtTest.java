@@ -17,10 +17,10 @@ class JwtTest {
     private String secret;
     private long expiration= 3600;
     private  UUID uuid;
+    
     @BeforeEach
     void setUp() {
         secret = "mySecretKeyForJwtThatIsLongEnough12345678901234567890";
-        
         jwtProvider = new JwtProvider(secret, expiration);
         uuid = UUID.randomUUID();
     }

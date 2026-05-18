@@ -51,9 +51,9 @@ public interface GrenadeRepo extends RepoBase<Grenade, UUID>{
 
     @Query("""
             SELECT g FROM Grenade g
-            WHERE g.approved = :approved
+            WHERE g.approved = false
             """)
-    Page<Grenade> findApproved(Pageable pageable, @Param("approved") boolean approved);
+    Page<Grenade> findUnapproved(Pageable pageable);
 
 
     @Modifying

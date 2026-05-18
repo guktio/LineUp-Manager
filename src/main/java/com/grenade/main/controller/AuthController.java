@@ -47,7 +47,6 @@ public class AuthController {
 
     @Operation(summary = "Login for user")
     @PostMapping("/login")
-
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         logger.info("POST {}/login",api);
         return ResponseEntity.ok(authService.login(authRequest));

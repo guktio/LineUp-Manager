@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.grenade.main.dto.UserRequest;
 import com.grenade.main.entity.User;
 import com.grenade.main.repo.UserRepo;
+import com.grenade.main.service.UserService;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
@@ -17,6 +19,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class InitService {
 
+    private final UserService userService;
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private final static Logger logger = LoggerFactory.getLogger(InitService.class);
@@ -35,15 +38,12 @@ public class InitService {
             userRepo.save(user);
         }
         if(!userRepo.existsByEmail("test@gmail.com")){
-            User user = User.builder()
-                                .username("test")
+            UserRequest user = UserRequest.builder()
                                 .email("test@gmail.com")
-                                .password(passwordEncoder.encode("test"))
-                                .uuid(UUID.randomUUID())
-                                .role(User.RoleType.USER)
+                                .password("test")
                                 .build();
             logger.debug("Test user created!");
-            userRepo.save(user);
+            userService.create(user);
         }
     }
 }

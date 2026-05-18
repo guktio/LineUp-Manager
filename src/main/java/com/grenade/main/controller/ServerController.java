@@ -1,71 +1,71 @@
-package com.grenade.main.controller;
+// package com.grenade.main.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+// import org.springframework.security.core.Authentication;
+// import org.springframework.security.core.context.SecurityContextHolder;
+// import org.springframework.web.bind.annotation.PostMapping;
+// import org.springframework.web.bind.annotation.RequestBody;
+// import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.RestController;
 
-import com.grenade.main.dto.GrenadeRequest;
-import com.grenade.main.dto.GrenadeResponse;
-import com.grenade.main.entity.User;
-import com.grenade.main.service.GrenadeService;
-import com.grenade.main.service.UserService;
+// import com.grenade.main.dto.GrenadeRequest;
+// import com.grenade.main.dto.GrenadeResponse;
+// import com.grenade.main.entity.User;
+// import com.grenade.main.service.GrenadeService;
+// import com.grenade.main.service.UserService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+// import io.swagger.v3.oas.annotations.Operation;
+// import io.swagger.v3.oas.annotations.tags.Tag;
+// import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/api/game")
-@RequiredArgsConstructor
-@PreAuthorize("hasRole('GAME_SERVER')")
-public class ServerController {
+// @RestController
+// @RequestMapping("/api/game")
+// @RequiredArgsConstructor
+// @PreAuthorize("hasRole('GAME_SERVER')")
+// public class ServerController {
 
-    private final GrenadeService grenadeService;
+//     private final GrenadeService grenadeService;
 
-    private final UserService userService;
+//     private final UserService userService;
 
-    private Logger logger = LoggerFactory.getLogger(ServerController.class);
+//     private Logger logger = LoggerFactory.getLogger(ServerController.class);
 
     
-    @Tag(name = "server")
-    @Operation(summary = "Create lineup from server")
-    @PostMapping("/lineup/new")
-    public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade){
-        logger.info("POST /api/game/lineup/new {}", grenade.toString());
-        String[] parts = SecurityContextHolder.getContext().getAuthentication().getName().split("-");
-        User user = userService.getBySteamId(parts[1]);
-         Authentication auth = new UsernamePasswordAuthenticationToken(
-                    user,
-                    null,
-                    user.getAuthorities());
+//     @Tag(name = "server")
+//     @Operation(summary = "Create lineup from server")
+//     @PostMapping("/lineup/new")
+//     public ResponseEntity<GrenadeResponse> create(@RequestBody GrenadeRequest grenade){
+//         logger.info("POST /api/game/lineup/new {}", grenade.toString());
+//         String[] parts = SecurityContextHolder.getContext().getAuthentication().getName().split("-");
+//         User user = userService.getBySteamId(parts[1]);
+//          Authentication auth = new UsernamePasswordAuthenticationToken(
+//                     user,
+//                     null,
+//                     user.getAuthorities());
         
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        logger.info(grenade.toString());
-        return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.OK);
-    }
+//         SecurityContextHolder.getContext().setAuthentication(auth);
+//         logger.info(grenade.toString());
+//         return new ResponseEntity<>(grenadeService.create(grenade), HttpStatus.OK);
+//     }
 
-    @Tag(name = "server")
-    @Operation(summary = "If user exists in database")
-    @PostMapping("/user/steamId")
-    public ResponseEntity<Boolean> isSteamID(@RequestBody String steamId){
-        logger.info(steamId);
-        return new ResponseEntity<>(userService.isUserExistBySteamId(steamId), HttpStatus.OK);
-    }
+//     @Tag(name = "server")
+//     @Operation(summary = "If user exists in database")
+//     @PostMapping("/user/steamId")
+//     public ResponseEntity<Boolean> isSteamID(@RequestBody String steamId){
+//         logger.info(steamId);
+//         return new ResponseEntity<>(userService.isUserExistBySteamId(steamId), HttpStatus.OK);
+//     }
 
-    // @Tag(name = "server")
-    // @Operation(summary = "Creates user context")
-    // @PostMapping("/user/auth")
-    // public ResponseEntity<AuthResponse> authUser(@RequestBody String steamId){
-    //     logger.info("POST /api/game/user/auth steamID={}",steamId);
-    //     return new ResponseEntity<AuthResponse>(steamService.loginWithSteam(steamId), HttpStatus.OK);
-    // }
-}
+//     // @Tag(name = "server")
+//     // @Operation(summary = "Creates user context")
+//     // @PostMapping("/user/auth")
+//     // public ResponseEntity<AuthResponse> authUser(@RequestBody String steamId){
+//     //     logger.info("POST /api/game/user/auth steamID={}",steamId);
+//     //     return new ResponseEntity<AuthResponse>(steamService.loginWithSteam(steamId), HttpStatus.OK);
+//     // }
+// }

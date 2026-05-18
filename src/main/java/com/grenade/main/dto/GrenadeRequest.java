@@ -1,6 +1,7 @@
 package com.grenade.main.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.grenade.main.entity.Grenade;
 
@@ -19,6 +20,6 @@ public class GrenadeRequest{
     public String side;
     public String speed;
     public List<String> buttons;
-    public String media;
+    public UUID media;
     public String description;
 }

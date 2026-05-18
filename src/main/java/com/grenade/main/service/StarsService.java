@@ -3,7 +3,6 @@ package com.grenade.main.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +29,11 @@ public class StarsService {
     private static final Logger logger = LoggerFactory.getLogger(StarsService.class);
 
     @Transactional
-    public boolean toggleStar(@NonNull UUID grUuid){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User with username"+username+" not found"));
-        Grenade grenade = grenadeRepo.findByUuid(grUuid).orElseThrow(() -> new EntityNotFoundException("Grenade with uuid "+grUuid+"not found"));
+    public boolean toggleStar(@NonNull UUID grUuid, UUID userUuid){
+        User user = userRepo.findByUuid(userUuid).orElseThrow(() -> 
+            new EntityNotFoundException("User not found with uuid: " + userUuid));
+        Grenade grenade = grenadeRepo.findByUuid(grUuid).orElseThrow(() -> 
+            new EntityNotFoundException("Grenade with uuid "+grUuid+"not found"));
         Optional<Stars> exists = starsRepo.findByUserUuidAndGrenadeUuid(user.getUuid(),grUuid);
         if(exists.isPresent()) {
             logger.info("User: {} unstared lineup: {};",user.getUuid(),grenade.getUuid());
